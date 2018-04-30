@@ -236,7 +236,7 @@ ESP8266如果断线会自动重连，`ifconfig()` 方法不仅可以查看当前
 wlan.ifconfig(('192.168.137.2','255.255.255.0','192.168.137.1','119.29.29.29'))
 ```
 
-修改后立即生效
+修改后会立即生效，如果在 `wlan.connect()` 之前就配置好了静态IP，这样就不会再向路由器发起DHCP请求了。
 
     C:\Users\yunfwe\Desktop>ping 192.168.137.2
 
@@ -406,7 +406,7 @@ get_nat_ip()
 
 通过网络来控制硬件，这样才能构建出各种智能硬件，先看看这块板子的引脚说明
 
-<table><thead><tr><th width="150">引脚</th><th>说明</th><th width="150">IC 内部引脚</th></tr></thead><tbody><tr><td>D0(RX)</td><td>串口接收</td><td>GPIO3</td></tr><tr><td>D1(TX)</td><td>串口发送</td><td>GPIO1</td></tr><tr><td>D2</td><td>I/O，不支持中断、PWM、I2C、以及1-wire</td><td>GPIO16</td></tr><tr><td>D3/SCL/D15</td><td>I/O，默认模式下I2C的SCL</td><td>GPIO5</td></tr><tr><td>D4/SDA/D14</td><td>I/O，默认模式下I2C的SDA</td><td>GPIO4</td></tr><tr><td>D5/SCK/D13</td><td>I/O，SPI的时钟</td><td>GPIO14</td></tr><tr><td>D6/MISO/D11</td><td>I/O，SPI的MISO</td><td>GPIO12</td></tr><tr><td>D7/MOSI/D11</td><td>I/O，SPI的MOSI</td><td>GPIO13</td></tr><tr><td>D8</td><td>I/O，上拉，低电平时进入FLASH模式</td><td>GPIO0</td></tr><tr><td>D9/TX1</td><td>I/O，上拉</td><td>GPIO2</td></tr><tr><td>D10/SS</td><td>I/O，下拉，SPI时默认的片选(SS)</td><td>GPIO15</td></tr><tr><td>A0</td><td>AD输入，0-3.3V</td><td>ADC</td></tr></tbody></table>
+<table><thead><tr><th width="25%">引脚</th><th>说明</th><th width="25%">IC 内部引脚</th></tr></thead><tbody><tr><td>D0(RX)</td><td>串口接收</td><td>GPIO3</td></tr><tr><td>D1(TX)</td><td>串口发送</td><td>GPIO1</td></tr><tr><td>D2</td><td>I/O，不支持中断、PWM、I2C、以及1-wire</td><td>GPIO16</td></tr><tr><td>D3/SCL/D15</td><td>I/O，默认模式下I2C的SCL</td><td>GPIO5</td></tr><tr><td>D4/SDA/D14</td><td>I/O，默认模式下I2C的SDA</td><td>GPIO4</td></tr><tr><td>D5/SCK/D13</td><td>I/O，SPI的时钟</td><td>GPIO14</td></tr><tr><td>D6/MISO/D11</td><td>I/O，SPI的MISO</td><td>GPIO12</td></tr><tr><td>D7/MOSI/D11</td><td>I/O，SPI的MOSI</td><td>GPIO13</td></tr><tr><td>D8</td><td>I/O，上拉，低电平时进入FLASH模式</td><td>GPIO0</td></tr><tr><td>D9/TX1</td><td>I/O，上拉</td><td>GPIO2</td></tr><tr><td>D10/SS</td><td>I/O，下拉，SPI时默认的片选(SS)</td><td>GPIO15</td></tr><tr><td>A0</td><td>AD输入，0-3.3V</td><td>ADC</td></tr></tbody></table>
 
 + 所有的IO工作电平为 **3.3V**，可瞬间承受 5V
 + 除D2外，所有 I/O 都支持中断，PWM，I2C，和 1-wire
