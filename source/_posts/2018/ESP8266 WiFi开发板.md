@@ -482,6 +482,94 @@ while True:
 led.deinit()
 ```
 
+#### Timer
+
+ESP8266的内存实在太小了，因此 MicroPython 并没有为ESP8266实现多线程的功能，那么如果想通过网络来控制呼吸灯应该怎么做到呢？可以试试用定时器。
+
+定时器类似于 JavaScript 的 `setTimeout` 和 `setInterval`，因为它们实现的功能是一摸一样的。MicroPython 的 `machine.Timer()` 会在给定的时间段执行一次或者周期性的执行这个回掉函数，下面看看具体是如何使用的。
+
+```python
+from machine import Timer
+t1 = Timer(-1)      # 传给构造器一个ID，如果这个ID是-1，会初始化一个虚拟定时器
+t1.init(period=5000, mode=Timer.ONE_SHOT, callback=lambda t:print(1))
+t2 = Timer(0)
+t2.init(period=2000, mode=Timer.PERIODIC, callback=lambda t:print(2))
+t2.deinit()         # 取消定时器。
+```
+
+参数 `period` 是每个周期的时间，单位是毫秒。`mode` 是运行模式，是只运行一次还是周期性运行。`callback` 则是到了这个时间周期然后执行的函数。如果这个 `period` 时间非常短的话，而且周期性的运行一个函数，这个函数将自己的数据保存在全局环境中，等到下个运行周期到了再继续处理数据，如果存在多个不同回掉函数的定时器，切换速度非常快的情况下，不就相当于多个函数在同时运行了吗。定时器每次调用回掉函数的时候，还会将自己本身作为参数传给回掉函数。
+
+下面看代码，运用上面所学的网络套接字，呼吸灯，还有定时器的知识来完成一个可以在局域网甚至公网来控制的呼吸灯。
+
+```python
+import time
+import socket
+import machine
+import network
+
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+wlan.ifconfig(('192.168.1.10', '255.255.255.0', '192.168.1.1', '119.29.29.29'))
+wlan.connect('SSID', 'PASSWORD')
+
+ap = network.WLAN(network.AP_IF)
+ap.active(False)
+
+led_timer = machine.Timer(1)
+keep_alive_timer = machine.Timer(2)
+net_control_timer = machine.Timer(3)
+led = machine.PWM(machine.Pin(2), freq=1000, duty=0)
+
+up = 1
+count = 0
+
+def breathing_light(t):
+    global led, up, count
+    if up == 1:
+        count += 3
+        led.duty(count)
+        if count > 1000:
+            up = 0
+    if up == 0:
+        count -= 3
+        led.duty(count)
+        if count == 3:
+            up = 1
+
+def keep_alive(t):
+    global s
+    s.sendto(b'ESP8266-msg: live',('1.1.1.1',2002))
+
+def net_control(t):
+    global s,led_timer,led
+    try:
+        data,addr = s.recvfrom(5)
+    except:
+        return
+    print('From: %s:%s\tRecv: %s' % (addr[0],addr[1],data.decode()))
+    if data in [b'on',b'start']:
+        led_timer.init(period=10, mode=machine.Timer.PERIODIC, callback=breathing_light)
+    elif data == b'stop':
+        led_timer.deinit()
+    elif data == b'off':
+        led_timer.deinit()
+        led.duty(0)
+
+while wlan.isconnected():
+    time.sleep_ms(200)
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.setblocking(0)
+s.bind(('0.0.0.0',2002))
+keep_alive_timer.init(period=10000, mode=machine.Timer.PERIODIC, callback=keep_alive)
+net_control_timer.init(period=10, mode=machine.Timer.PERIODIC, callback=net_control)
+print('Running...')
+```
+
+将代码中的连接 WiFi 的`SSID`和`PASSWORD`换成实际的，`keep_alive` 函数主要是保持一条与公网主机的UDP通道，如果没有公网主机可以注释掉下面 `keep_alive_timer` 定时器的语句。程序启动了一个UDP端口，接受来自局域网主机的控制，如果存在公网主机，也可以在公网主机上向开发板发送数据。UDP套接字设置为了非阻塞模式，然后定时器每10毫秒会询问一次是否收到UDP数据，如果收到了 `on` 或者 `start` 数据，就启动呼吸灯的定时器，呼吸灯定时器的回掉函数将当前的状态保存在了全局变量中，执行一次更改亮度的操作后就退出了，等待下个10毫秒继续执行。这样多个定时器如果存在互相调用，就不会因为发生阻塞而影响其他定时器的运行了。
+
+当ESP8266和公网建立通信后，那么可以玩的地方更多了，比如接收温湿度传感器的数据，然后监控环境温度并定期将温度上传到服务器，或者接入微信公众平台用微信来控制单片机，这些就又是一个很大的话题了。
+
 ## 附录
 
 板子还在继续折腾中。。。等折腾出其他好玩的了继续更新
