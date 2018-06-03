@@ -1,0 +1,4 @@
+#!ipxe
+set 210:string http://192.168.4.6/pxefiles/
+set 209:string pxelinux.cfg/default
+chain ${210:string}pxelinux.0
