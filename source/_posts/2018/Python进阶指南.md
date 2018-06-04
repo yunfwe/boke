@@ -1,7 +1,7 @@
 ---
 title: Python进阶指南
 date: 2018-04-04 23:12:00
-updated: 2018-04-07
+updated: 2018-04-11
 categories: 
     - Python
 tags:
@@ -247,6 +247,174 @@ Python3 的 `reduce()` 不再是默认全局空间的了，用的时候需要先
 
 题外话：理解了 Python 中的 `map()` 和 `reduce()` 函数，也很容易理解 Hadoop 中的 MapReduce 计算模型了。
 
+### 对字符串进行操作
+
+#### 使用正则来分割字符串
+
+对字符串的分割通常是使用字符串的 `split()` 方法，但是这个方法有个局限就是每次只能按照一种分隔符来进行分割，而使用 `re.split()` 则可以使用正则表达式来进行分割。
+
+    >>> import re
+    >>> s = 'abc 123;def,oe2'
+    >>> re.split(r'\s|;|,', s)
+    ['abc', '123', 'def', 'oe2']
+
+
+#### 字符串开头或结尾匹配
+
+可能经常需要对一个url的协议头进行检测，或者对一个文件名的后缀进行检测，最简单的方法就是使用 `str.startswith()` 和 `str.endswith()` 方法了。
+
+    >>> url = ['http://127.0.0.1/','ftp://127.0.0.1/']
+    >>> fname = ['hello.py', 'hi.c', 'hi.py', 'hi.js']
+    >>> [s for s in url if s.startswith('http:')]
+    ['http://127.0.0.1/']
+    >>> [s for s in fname if s.endswith(('c','js'))]
+    ['hi.c', 'hi.js']
+
+需要注意的是，如果想匹配多个字符串开头或结尾，必须将多个匹配项放到元组内。
+
+#### 字符串匹配和搜索
+
+如果只是简单的匹配或者搜索字符串中特定的字符串，使用 `str` 类型的 `find()` 方法就可以了，但是如果想要完成更复杂的搜索，就要使用正则表达式了，Python的 `re` 模块提供了对正则表达式的支持
+
+    >>> import re, os
+    >>> reg = re.compile(r'inet addr:(.*?)\s', re.S)
+    >>> re.findall(reg, os.popen('ifconfig em1').read())
+    ['192.168.4.6']
+
+#### 字符串搜索和替换
+
+对于简单的字符串替换，可以使用 `str.replace()` 方法。
+
+    >>> text = 'yeah, but no, but yeah, but no, but yeah'
+    >>> text.replace('yeah', 'yep')
+    'yep, but no, but yep, but no, but yep'
+
+对于复杂的替换可以使用 `re.sub()` 函数。
+
+    >>> text = 'Today is 11/27/2012. PyCon starts 3/13/2013.'
+    >>> import re
+    >>> re.sub(r'(\d+)/(\d+)/(\d+)', r'\3-\1-\2', text)
+    'Today is 2012-11-27. PyCon starts 2013-3-13.'
+
+如果想要忽略大小写的替换，可以在使用 `re` 模块的时候给这些操作提供 `re.IGNORECASE` 标志参数。
+
+    >>> text = 'UPPER PYTHON, lower python, Mixed Python'
+    >>> re.findall('python', text, flags=re.IGNORECASE)
+    ['PYTHON', 'python', 'Python']
+    >>> re.sub('python', 'snake', text, flags=re.IGNORECASE)
+    'UPPER snake, lower snake, Mixed snake'
+
+对于文本搜索，难点在于正则表达式的编写。
+
+#### 删除字符串头尾部不需要的字符
+
+`strip()` 方法能用于删除开始或结尾的字符。 `lstrip()` 和 `rstrip()` 分别从左和从右执行删除操作。 默认情况下，这些方法会去除空白字符，但是也可以指定其他字符。
+
+    >>> s = ' hello world \n'
+    >>> s.strip()
+    'hello world'
+    >>> s.lstrip()
+    'hello world \n'
+    >>> s.rstrip()
+    ' hello world'
+    >>>
+    >>> t = '-----hello====='
+    >>> t.lstrip('-')
+    'hello====='
+    >>> t.strip('-=')
+    'hello'
+
+#### 字符串对齐
+
+在终端上打印长短不一的字符串时这个可能非常有用，对字符串的对其方法，可以使用字符串的 `ljust()` , `rjust()` 和 `center()` 方法
+
+```python
+print('id'.ljust(10),'name'.ljust(10),'age'.ljust(10),sep='')
+print('-'*23)
+print('1'.ljust(10),'Tom'.ljust(10),'20'.ljust(10),sep='')
+print('2'.ljust(10),'Jack'.ljust(10),'21'.ljust(10),sep='')
+print('3'.ljust(10),'Alan'.ljust(10),'19'.ljust(10),sep='')
+```
+
+输出：
+
+    [root@localhost ~]# python3 test.py
+    id        name      age       
+    -----------------------
+    1         Tom       20        
+    2         Jack      21        
+    3         Alan      19     
+
+这些方法都能接受一个可选的填充字符参数
+
+    >>> a = 'Tom'
+    >>> a.center(10,'*')
+    '***Tom****'
+
+或者还可以使用更强大的内建函数 `format()`。
+
+#### 字符串拼接
+
+字符串拼接除了使用 `+` 号连接两个字符串，还有效率更高更快的 `join()` 方法， `join()` 适用于要拼接的字符串在一个可迭代对象中。
+
+    >>> parts = ['Is', 'Chicago', 'Not', 'Chicago?']
+    >>> ' '.join(parts)
+    'Is Chicago Not Chicago?'
+    >>> ','.join(parts)
+    'Is,Chicago,Not,Chicago?'
+    >>> ''.join(parts)
+    'IsChicagoNotChicago?'
+
+#### 字符串插入变量
+
+可能经常会遇到动态生成字符串的场景，Python 提供了多种方式来实现这种需求
+
+使用字符串拼接：
+
+    >>> s = 'Monday'
+    >>> 'Today is ' + s
+    'Today is Monday'
+
+
+使用占位符：
+
+    >>> s = 'Hi, %s is %s'
+    >>> s % ('Today', 'Monday')
+    'Hi, Today is Monday'
+
+使用 `str.format()` 函数：
+
+    >>> info = 'Name: {name}, Age: {age}'
+    >>> info.format(name='Tom', age=20)
+    'Name: Tom, Age: 20'
+
+使用格式化字符串（Python 3.6 +）
+
+    >>> name,age = 'Tom',20
+    >>> f'Name: {name}, Age: {age}'
+    'Name: Tom, Age: 20'
+
+#### 像操作文件一样操作字符串
+
+使用 `io.StringIO()` 和 `io.BytesIO()` 类来创建类文件对象操作字符串数据
+
+    >>> s = io.StringIO()
+    >>> s.write('Hello World\n')
+    12
+    >>> print('This is a test', file=s)
+    15
+    >>> # Get all of the data written so far
+    >>> s.getvalue()
+    'Hello World\nThis is a test\n'
+    >>> # Wrap a file interface around an existing string
+    >>> s = io.StringIO('Hello\nWorld\n')
+    >>> s.read(4)
+    'Hell'
+    >>> s.read()
+    'o\nWorld\n'
+    >>>
+
+`io.StringIO` 只能用于文本。如果你要操作二进制数据，要使用 `io.BytesIO` 类来代替
 
 ### 对列表/字典等操作
 
@@ -337,17 +505,14 @@ def dedupe(items, key=None):
     >>> INFO[ip]
     '192.168.198.1'
 
-### 对字符串进行操作
-
-#### 使用正则来分割字符串
-
-#### 字符串开头或结尾匹配
 
 ## 标准库
 
-### collections 数据类型容器
+### 数据结构处理
 
-#### collections.namedtuple
+#### collections 数据类型容器
+
+##### collections.namedtuple
 
 Python中普通的 `tuple` 数据类型的元素是不可修改的，而且 `tuple` 的长度是不可变的，因此 `tuple` 的资源消耗少于 `list`。`tuple` 的元素访问只能通过索引，而在程序中通过索引访问元素的代码可读性太差，而 `collections.namedtuple` 则拓展了 `tuple` 的能力，允许以面向对象的方式访问其中的元素，而且资源消耗却跟 `tuple` 差不多。
 
@@ -368,7 +533,7 @@ Python中普通的 `tuple` 数据类型的元素是不可修改的，而且 `tup
 可以看到 `namedtuple` 类型是 `tuple` 类型的子类。任何可以使用 `tuple` 的地方就可以使用 `namedtuple`
 
 
-#### collections.OrderedDict
+##### collections.OrderedDict
 
 Python的默认 `dict` 类型是无序的，使用 `OrderedDict` 则可以实现有序的字典。
 
@@ -384,7 +549,7 @@ Python的默认 `dict` 类型是无序的，使用 `OrderedDict` 则可以实现
 `OrderedDict` 是 `dict` 类型的子类，使用 `dict` 类型的地方也完全可以使用 `OrderedDict`
 
 
-#### collections.deque
+##### collections.deque
 
 `collections.deque` 是一个双端队列。顾名思义 `deque` 提供了在队列两端插入和删除的操作，如果创建 `deque` 对象的时候指定了队列长度，当队列满了从一端继续插入元素的时候，另一端的元素就会被移除。如果没有指定队列长度，就可以在两端无限插入元素了，当然前提是内存够用。
 
@@ -415,7 +580,7 @@ while True:
 
 Python的 `list`（列表）对象不也提供了两端插入或者删除元素的方法吗，但是 `deque` 在两端插入或删除的时间复杂度是 `O(1)`，而 `list` 是 `O(N)`。
 
-#### collections.Counter
+##### collections.Counter
 
 `Counter` 工具用于支持便捷和快速地统计可迭代对象中每个元素出现的次数，而且速度非常快。
 
@@ -429,7 +594,7 @@ Python的 `list`（列表）对象不也提供了两端插入或者删除元素�
 
 `Counter` 是 `dict` 类型的子类，以迭代器的每个元素为键，元素出现的次数为值。
 
-#### collections.ChainMap
+##### collections.ChainMap
 
 当需要从多个字典中执行某些操作，比如检测某些键或值是否存在，使用 `ChainMap` 函数可以将多个字典逻辑上合并为一个字典。
 
@@ -448,9 +613,9 @@ Python的 `list`（列表）对象不也提供了两端插入或者删除元素�
 
 如果出现重复键，第一次找到的键被返回，如果对新产生的字典做操作，更改也会映射到原来的字典上去。如果只考虑合并两个字典，可以使用字典的 `update` 方法。
 
-### heapq 堆队列算法
+#### heapq 堆队列算法
 
-#### 实现排序
+##### 实现排序
 
 堆是一个二叉树，其中每个父节点的值都小于或者等于其所有子节点的值。整个堆的最小元素总是位于二叉树的根节点。Python 的 `heapq` 模块提供了对堆的支持。
 
@@ -494,7 +659,7 @@ print('Used time: %s sec' % str(time.time()-now))
     Used time: 1.21054005623 sec
 
 
-#### 实现一个优先级队列
+##### 实现一个优先级队列
 
 先看这样一个例子：
 
@@ -548,9 +713,9 @@ class PriorityQueue:
 
 Tom 的优先级最高，所以 Tom 被最先弹出了，一个简单的优先级队列就完成了。如果需要在多个线程中使用同一个队列，可以加入锁和信号量机制。
 
-### operator 内置操作符的函数接口
+#### operator 内置操作符的函数接口
 
-#### operator.itemgetter
+##### operator.itemgetter
 
 如果有一个字典列表，想根据某个或某几个字典字段来排序这个列表。通过使用 `operator` 模块的 `itemgetter` 函数，可以非常容易的排序这样的数据结构。
 
@@ -593,7 +758,7 @@ Tom 的优先级最高，所以 Tom 被最先弹出了，一个简单的优先�
 但是效率可能要比 `itemgetter` 慢一些。
 
 
-#### operator.attrgetter
+##### operator.attrgetter
 
 `itemgetter` 是获取字典的每一项，如果是将数据保存在对象实例的属性中，则可以使用 `attrgetter` 来获取
 
@@ -623,9 +788,9 @@ sorted(users, key=attrgetter('age','id'))
 同理，如果不想用 `attrgetter` 也可以自己用 `lambda` 实现功能。
 
 
-### itertools 操作迭代对象的库
+#### itertools 操作迭代对象的库
 
-#### itertools.groupby
+##### itertools.groupby
 
 如果有一个包含字典或者对象实例的列表，想根据某个字段进行分组迭代访问，可以使用 `groupby` 函数。
 
@@ -663,10 +828,64 @@ for age,items in groupby(rows, key=itemgetter('age')):
       {'id': 1004, 'name': 'Ani', 'age': 20}
 
 
+### 文件处理
 
-### functools 高阶函数库
+#### 固定大小的文件迭代
+
+如果有个文本文件，迭代文件对象最好是按行读取，但如果是二进制文件，则最好是每次读取固定大小的字节。
+
+`iter()` 函数有个不常用的用法是如果传入了两个参数，第一个参数必须是一个可调用对象，第二个参数是结束标志，如果迭代过程中遇到了这个结束标志，迭代就结束了。可以利用这个性质来实现文件按固定字节读取。
+
+    >>> f = open('/bin/bash','rb')
+    >>> i = iter(lambda :f.read(10), b'')
+    >>> next(i)
+    b'\x7fELF\x02\x01\x01\x00\x00\x00'
+    >>> next(i)
+    b'\x00\x00\x00\x00\x00\x00\x02\x00>\x00'
+    >>> next(i)
+    b'\x01\x00\x00\x00`\x05B\x00\x00\x00'
+
+#### gzip/bz2 文件解压缩
+
+`gzip` 和 `bz2` 为Python提供了对文件进行 `gz` 和 `bz2` 格式的解压缩。
+
+文件压缩：
+
+    >>> import gzip
+    >>> f = gzip.open('/tmp/test.gz','wt')
+    >>> f.write('Hello gzip')
+    10
+    >>> f.close()
+
+`gzip.open()` 和 `open()` 函数一样，根据文件模式来判断对文件的读写方式，如果对文本文件压缩，使用 `wt` 文件模式，读取压缩文件使用 `rt` 文件模式。
+
+文件解压：
+
+    >>> import gzip
+    >>> f = gzip.open('/tmp/test.gz','rt')
+    >>> f.read()
+    'Hello gzip'
+
+`bz2` 和 `gzip` 的使用方式一致。压缩文件的时候还可以传入一个压缩等级的参数 默认是 `compresslevel=9`，打开的文件可以是一个文件名，也可以是一个类文件对象上，比如一个套接字对象、一个管道等。
+
+#### mmap 内存映射文件
+
+对文件修改的场景还是经常遇到的，但是如果要修改一个非常大的文件，传统的读取文件，修改文件，写回文件的方式就非常不合适了。
+
+
+
 
 ## 第三方库
+
+### chatdet
+
+### pyinstaller
+
+### gevent
+
+### bottle
+
+### gunicorn
 
 ## 附录
 
