@@ -593,3 +593,5 @@ vim /usr/local/samba/etc/smb.conf
 压缩包里包含了所有的配置文件和dnsmasq, pxelinux.0, undionly.kpxe 这些就可以免去编译安装了。
 
 再介绍一个好玩的，通过中科大网络启动服务来安装系统 [点此访问](https://lug.ustc.edu.cn/wiki/server/pxe/start?bootswatch-theme=cosmo)
+
+如果觉得手动配置PXE启动的每一个环节非常麻烦，可以试试自动化装机神器 [**Cobbler**](http://cobbler.github.io/)
