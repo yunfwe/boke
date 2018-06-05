@@ -221,7 +221,7 @@ vim pxelinux.cfg/default
         menu default
         localboot 0xffff
       
-这里为了界面美观使用了一张背景图片: `splash.jpg`，图片需要是一张 640*480像素的 jpg 图片，并根据图片的主题颜色调整下页面边框、文字等颜色，如果不需要使用背景图片的话可以将 `menu background` 和 `menu color` 的配置项都删掉或者注释掉。
+这里为了界面美观使用了一张背景图片: `splash.jpg`，图片需要是一张 640*480 像素的 jpg 图片，并根据图片的主题颜色调整下页面边框、文字等颜色，如果不需要使用背景图片的话可以将 `menu background` 和 `menu color` 的配置项都删掉或者注释掉。
 
 其中 `timeout 300` 会在引导界面30秒无操作就就启动下面 `label` 中定义为 `menu default` 的条目。到这一步已经可以尝试将虚拟机或者主机通过 PXE 启动，看看是否可以加载出引导界面了。
 ![](/uploads/2018/pxe/6vkt321i87dn5iut.jpg)
