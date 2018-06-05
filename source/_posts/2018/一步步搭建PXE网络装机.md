@@ -399,7 +399,7 @@ vim /data/wwwroot/apt/ubuntu16.04/ks-server-vmware.cfg
     label ubuntu server 16.04
         menu label Install Ubuntu server 16.04.4 (minimal install)
         kernel /apt/ubuntu16.04/install/netboot/ubuntu-installer/amd64/linux
-        append initrd=apt/ubuntu16.04/install/netboot/ubuntu-installer/amd64/initrd.gz ks=http://192.168.4.6/apt/ubuntu16.04/ks-server-vmware.cfg  --- quiet live-installer/net-image=http://192.168.4.6/apt/ubuntu16.04/install/filesystem.squashfs
+        append initrd=apt/ubuntu16.04/install/netboot/ubuntu-installer/amd64/initrd.gz ks=http://192.168.4.6/apt/ubuntu16.04/ks-server-vmware.cfg  --- live-installer/net-image=http://192.168.4.6/apt/ubuntu16.04/install/filesystem.squashfs
 
 ##### 开始安装
 
