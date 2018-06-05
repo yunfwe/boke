@@ -161,7 +161,9 @@ make bin/undionly.kpxe EMBED=embed.ipxe
 cp bin/undionly.kpxe /data/pxeboot/
 ```
 
-然后编辑 `menu.ipxe` 文件，配置接下来的文件都通过 http 协议来访问，并且链接到 pxelinux.0 
+其中编译步骤需要 `lzma.h` 这个头文件，需要安装你的发行版上提供这个头文件的软件包。编译好的 `undionly.kpxe` 可以保存下来下次搭建环境的时候直接用，如果服务是搭建在 Windows 系统上也可以使用这个编译好的文件。
+
+然后编辑 `menu.ipxe` 文件，配置接下来的文件都通过 http 协议来访问，并且链接到 pxelinux.0。
 
 ```bash
 vim /data/pxeboot/menu.ipxe
@@ -173,7 +175,7 @@ vim /data/pxeboot/menu.ipxe
     set 209:string pxelinux.cfg/default
     chain ${210:string}pxelinux.0
 
-其中 `set 210:string` 定义了请求的文件的主目录，因为之前创建的 `/data/wwwroot/` 为 http 的根目录，`/data/wwwroot/pxefiles/` 目录中存放 pxelinux.0 相关的数据文件。
+其中 `set 210:string` 定义了请求的文件的主目录，因为之前创建的 `/data/wwwroot/` 为 http 的根目录，`/data/wwwroot/pxefiles/` 目录中存放 pxelinux.0 相关的数据文件。其中的服务器IP地址需要替换为你实际的服务器IP。
 `set 209:string` 则定义了 pxelinux.0 直接加载 `pxelinux.cfg/default` 这个配置文件，否则 pxelinux.0 会阶梯性的查找配置文件，如果都没找到最后默认才加载 `pxelinux.cfg/default`。
 
 #### 安装 pxelinux.0 引导文件
