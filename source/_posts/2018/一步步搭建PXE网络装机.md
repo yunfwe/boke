@@ -191,6 +191,7 @@ tar xf syslinux-3.86-pre4.tar.xz
 cd syslinux-3.86-pre4
 cp com32/menu/vesamenu.c32 /data/wwwroot/pxefiles/
 cp core/pxelinux.0 /data/wwwroot/pxefiles/
+cp memdisk/memdisk /data/wwwroot/pxefiles/
 ```
 
 syslinux 最新版是16年发布的 6.04，但是使用中发现无法引导 ESXI，而且 pxelinux.0 引导后还要加载好几个 `.c32` 文件，所以采用老一点的 3.86 版本。 接着给 pxelinux.0 提供配置文件
