@@ -6,7 +6,7 @@ categories:
 tags:
     - websocket
 photos:
-    - /uploads/photos/jjv8512oa1v816j4.jpg
+    - /uploads/photos/asdasdaefaeda.jpg
 ---
 
 ## 简介
@@ -228,3 +228,5 @@ ws.send("Hi! 喵喵喵")
     Fact data: Hi! 喵喵喵
 
 ## 附录
+
+客户端一般都是浏览器等程序，如果感兴趣的话也可以试试用 Python 实现一个简单的 WebSocket 客户端。
