@@ -98,11 +98,11 @@ Websocket协议通过序列化的数据帧传输数据。数据封包协议中�
 而服务端返回的数据则不需要掩码和加密数据。
 
 
-## 服务端的Python实现
+## 实现服务端
 
 接下来使用 Python3 来实现一个简单的 WebSocket 回声服务器，并每个比特的分析 WebSocket 协议的头部。
 
-## 编写代码
+### 编写代码
 
 ```python
 import struct
@@ -205,7 +205,7 @@ if __name__ == '__main__':
 
 创建套接字监听，并启动服务，当有客户端握手成功后，将客户端发来的数据原样返回并关闭连接。运行脚本，然后看看效果吧！
 
-## 浏览器测试
+### 浏览器测试
 
 这里在 Chrome 浏览器中做演示，`F12` 进入开发者模式，然后点击 `Console`，现在就打开 JavaScript 的交互界面了。然后输入如下代码：
 
@@ -226,8 +226,5 @@ ws.send("Hi! 喵喵喵")
     Client 127.0.0.1:53117 handshake success!
     Raw data: b'\x81\x8d7\x91\xc6\x8b\x7f\xf8\xe7\xab\xd2\x07sn\xa1$#\x1d\x82'
     Fact data: Hi! 喵喵喵
-
-
-## 客户端的Python实现
 
 ## 附录
