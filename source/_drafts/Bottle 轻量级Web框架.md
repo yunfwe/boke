@@ -1111,7 +1111,73 @@ app.config['some.int'] = 'not an int' # 抛出异常
 
 ### 简单模板引擎
 
+Bottle 附带一个快速、功能强大且易学的内置模板引擎，简称 `SimpleTemplate`。 `view()` 和 `template()` 函数帮助用户使用这个引擎。这里解释模板语法，并提供几个常用的示例。
 
+**基本 API 使用**
+
+```python
+from bottle import SimpleTemplate
+tpl = SimpleTemplate('Hello {{name}}!')
+tpl.render(name='World')
+# 结果：u'Hello World!'
+```
+
+使用 `template()` 函数可以简化这个过程
+
+```python
+from bottle import template
+template('Hello {{name}}!', name='World')
+```
+
+#### SimpleTemplate 语法
+
+Python 是一种非常强大的语言，但它严格的缩进使它很难用于模板语言。`SimpleTemplate` 取消了这些限制，允许你编写干净，可读和可维护的模板，同时保留 Python 语言的功能。
+
+##### 内联表达式
+
+上面已经学习了 `{{...}}` 这样的语法，实际上可以在大括号中使用任何 Python 表达式：
+
+    >>> template('Hello {{name}}!', name='World')
+    'Hello World!'
+    >>> template('Hello {{name.title() if name else "stranger"}}!', name=None)
+    'Hello stranger!'
+    >>> template('Hello {{name.title() if name else "stranger"}}!', name='mArC')
+    'Hello Marc!'
+
+如果传入的字符串包含 HTML 字符，则会自动转义来防止 XSS 攻击，但是你可以使用 `!` 来表示禁止转义：
+
+    >>> template('Hello {{name}}', name='<b>World</b>')
+    'Hello &lt;b&gt;World&lt;/b&gt;'
+    >>> template('Hello {{!name}}', name='<b>World</b>')
+    'Hello <b>World</b>'
+
+##### 嵌入 Python 代码
+
+模板引擎允许你在模板中嵌入 Python 代码行或块。代码行以 `%` 开头，代码快由 `<%` 和 `%>` 包围：
+
+```tpl
+% name = "Bob"  # 行级别的 Python 代码
+<p>Some plain text in between</p>
+<%
+  # 块级别的 Python 代码
+  name = name.title().strip()
+%>
+<p>More plain text</p>
+```
+
+嵌入的 Python 代码遵循常规 Python 语法，但有两个额外的语法规则：
+
++ 缩进被忽略，你可以根据需要在语句前尽可能多的放置空格，这样可以与周围的代码对其，提高可读性。
++ 缩进的块现在必须用 `%end` 显式关闭，比如：
+
+```tpl
+<ul>
+  % for item in basket:
+    <li>{{item}}</li>
+  % end
+</ul>
+```
+##### 空白符控制
 
 
 ### API参考
