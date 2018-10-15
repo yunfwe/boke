@@ -251,6 +251,40 @@ if __name__ == '__main__':
 
 `ANY` 方法会匹配所有请求方法，但也只会在没有定义其他更具体的路由时。这对于将请求重定向到更具体的子应用程序的代理路由很有用。
 
+##### 显式路由配置
+
+如果不想使用装饰器的方式来定义路由，可以显式的将某个函数传递给某个路由，下面看一个简单的例子：
+
+```python
+import bottle
+
+app = bottle.Bottle()
+
+def hello():
+    return 'Hello World!'
+
+app.route('/', 'GET', hello)
+```
+
+或者使用一个工厂函数：
+
+```python
+import bottle
+
+def hello():
+    return 'Hello World!'
+
+def setup_routing(app, urls):
+    for u in urls:
+        app.route(*u)
+
+urls = [
+    ('/', 'GET', hello),
+]
+
+app = bottle.Bottle()
+setup_routing(app, urls)
+```
 
 ##### 错误页面
 
@@ -718,9 +752,368 @@ def test_template(name='World'):
 模板使用 `%` 开始编写 Python 的代码，使用 `%end` 结束代码块，更详细的语法规则 下面会讲到。
 模板在编译后，将缓存在内存中，在清楚缓存之前，对模板的任何改动都不会立即生效，可以通过调用 `bottle.TEMPLATES.clear()` 来清理缓存，如果在调试模式下将禁用缓存。
 
+#### 插件
+
+Bottle 的核心功能涵盖了最常见的用例，但作为一个微框架，它有其局限性，插件为框架添加缺少的功能，这就是插件发挥作用的地方。
+
+##### 体验插件
+
+这里看看 `SQLitePlugin` 插件的简单用法，首先通过pip安装这个插件：`pip install bottle-sqlite`，然后看下面示例：
+
+```python
+import bottle
+from bottle_sqlite import SQLitePlugin
+
+app = bottle.Bottle()
+sqlite_plugin = SQLitePlugin(dbfile='/tmp/test.db')
+app.install(sqlite_plugin)
+
+@app.route('/createdb')
+def create(db):
+    db.execute('create table data (key varchar, value varchar)')
+    db.commit()
+    return 'True\n'
+
+@app.route('/set')
+def db_set(db):
+    key = bottle.request.params.get('k')
+    value = bottle.request.params.get('v')
+    db.execute('insert into data values (?,?)', (key, value))
+    db.commit()
+    return 'True\n'
+
+@app.route('/get')
+def db_get(db):
+    key = bottle.request.params.get('k')
+    c = db.execute('select value from data where key=?', (key,))
+    row = c.fetchone()
+    print(row)
+    return row[0] + '\n'
+
+if __name__ == '__main__':
+    app.run(host='localhost', port=8080, debug=True, reloader=True)
+```
+
+对接口进行测试：
+
+    root@ubuntu:~# curl http://127.0.0.1:8080/createdb
+    True
+    root@ubuntu:~# curl "http://127.0.0.1:8080/set?k=a&v=qwe"
+    True
+    root@ubuntu:~# curl "http://127.0.0.1:8080/get?k=a"
+    qwe
+
+对 `app` 对象安装 `SQLitePlugin` 插件，接着在需要使用数据库的地方，给回调函数添加 `db` 关键字即可，关键字的位置无所谓。插件检测到添加了 `db` 的关键字后，会将一个打开的 `sqlite3.Connection` 对象传递给 `db` 关键字，这样就可以在回掉函数中操作数据库了。
+
+##### 卸载插件
+
+卸载插件非常简单，调用 `app.uninstall()` 函数即可：
+
+```python
+app.uninstall(sqlite_plugin)    # 卸载指定的插件
+app.uninstall(SQLitePlugin)     # 卸载这个类型的所有插件
+app.uninstall('sqlite')         # 卸载以这个名称开头的所有插件
+app.uninstall(True)             # 一次性卸载所有插件
+```
+
+##### 将插件安装到指定的路由
+
+有时候并不想全局安装某个插件，可以单独将这个插件安装到某个路由上：
+
+```python
+sqlite_plugin = SQLitePlugin(dbfile='/tmp/test.db')
+@app.route('/create', apply=[sqlite_plugin])
+def create(db):
+    pass
+```
+将需要应用到这个路由的插件添加到 `apply` 参数的列表中就可以了。
+
+##### 黑名单插件
+
+有时候不想让某个函数应用某个插件，可以使用 `skip` 来跳过这些插件：
+
+```python
+sqlite_plugin = SQLitePlugin(dbfile='/tmp/test.db')
+app.install(sqlite_plugin)
+@app.route('/create', skip=[sqlite_plugin])
+def create():
+    pass
+```
+
+如果设置 `skip=True` 将跳过所有插件。
+
+##### 插件与子程序
+
+将一个 Bottle 程序挂挂载到另一个 Bottle 程序上，相当于在主程序上创建一个代理路由，访问该代理路由的请求都转发到相应的子程序。此类代理路由是禁用插件的，安装在主程序上的插件并不会影响到子程序 例如：
+
+```python
+import bottle
+from bottle_sqlite import SQLitePlugin
+
+app = bottle.Bottle()
+blog = bottle.Bottle()
+
+sqlite_plugin = SQLitePlugin(dbfile='/tmp/test.db')
+app.install(sqlite_plugin)
+
+@blog.route('/db')
+def blog_db(db='Not sqlite db\n'):
+    return str(db)
+
+@app.route('/db')
+def app_db(db='Not sqlite db\n'):
+    return str(db)
+
+app.mount('/blog', blog)
+
+if __name__ == '__main__':
+    app.run(host='localhost', port=8080, debug=True, reloader=True)
+```
+
+访问这几个路由：
+
+    root@ubuntu:~# curl http://127.0.0.1:8080/db
+    <sqlite3.Connection object at 0x7fad044429d0>
+    root@ubuntu:~# curl http://127.0.0.1:8080/blog/db
+    Not sqlite db
+
+
+使用 `app.mount()` 函数将 `blog` 的所有路由挂载到 `app` 的 `/blog` 路由下。
+
+#### 实际开发
+
+现在已经可以使用Bottle开发简单的应用了，下面这些知识可以帮助你提高工作效率。
+
+##### 默认应用
+
+Bottle 维护一个全局堆栈的 Bottle 实例，并使用堆栈顶部作为某些模块级函数和装饰器的默认值，例如 `bottle.route()` 装饰器，是调用默认应用程序的快捷方式：
+
+```python
+from bottle import route
+
+@route('/')
+def hello():
+    return 'hello world'
+```
+
+对于小型应用程序会非常方便，但是只要导入模块，就会将路由安装到全局应用程序中。为了避免这种导入，Bottle 提供了更明确的方法：
+
+```python
+from bottle import Bottle
+
+app = Bottle()
+@app.route('/')
+def hello():
+    return 'hello world'
+```
+
+分离应用程序对象可以大大提高可重用性，其他开发人员也可以安全的从你的模块中导入对象并使用 `Bottle.mount()` 将应用程序合并在一起。另外还可以使用应用程序堆栈来隔离路由：
+
+```python
+from bottle import route, default_app
+default_app.push()
+
+@route('/')
+def hello():
+    return 'Hello World'
+
+app = default_app.pop()
+```
+
+##### 调试模式
+
+在开发早期，调试模式非常有用，可以在有错误发生时显示更详细的错误信息，并且模板不会缓存，插件也会立即应用。
+
+可以通过调用 `bottle.debug(True)` 或者在 `app.run()` 中设置 `debug` 参数为 `True`。
+
+##### 自动加载运行
+
+在开发过程中，修改了代码必须手动重启服务才可以测试更改，自动重新加载器可以帮你完成这些工作：
+
+```python
+import bottle
+app = bottle.Bottle()
+app.run(reloader=True)
+```
+
+##### 命令行界面
+
+从版本 `0.10` 开始，就可以使用 Bottle 作为命令行工具：
+
+    root@ubuntu:~# python -m bottle
+    Usage: bottle.py [options] package.module:app
+
+    Options:
+    -h, --help            show this help message and exit
+    --version             show version number.
+    -b ADDRESS, --bind=ADDRESS
+                            bind socket to ADDRESS.
+    -s SERVER, --server=SERVER
+                            use SERVER as backend.
+    -p PLUGIN, --plugin=PLUGIN
+                            install additional plugin/s.
+    --debug               start server in debug mode.
+    --reload              auto-reload on file changes.
+
+    Error: No application specified.
+
+只用指定应用模块启动即可：
+
+```python
+import bottle
+
+app = bottle.Bottle()
+
+@app.route('/')
+def hello():
+    return 'Hello World'
+
+```
+
+将代码保存为 `hello.py`，然后通过命令行启动：`python -m bottle --debug --reload hello:app`，`hello` 是模块名，`app` 是应用对象。
+
+
 ### 配置
-### 请求路由
+
+Bottle 应用程序的配置存储在 `Bottle.config` 这个类似于字典的对象里，可以用与通过配置告诉插件需要做什么，也可以存储自己的配置。
+
+#### 基础配置
+
+`Bottle.config` 的行为看起来很想普通字典，所有常见的字典方法都能按照预期工作，让我们看看一些例子：
+
+```python
+import bottle
+app = bottle.Bottle()
+
+app.config['autojson']    = False      # 关闭JSON自动转换的特性
+app.config['sqlite.db']   = ':memory:' # 告诉SQLite插件使用哪个数据库
+app.config['myapp.param'] = 'value'    # 自定义配置值
+
+# 一次性配置多个值
+app.config.update({
+    'autojson': False,
+    'sqlite.db': ':memory:',
+    'myapp.param': 'value'
+})
+
+# 添加默认值
+app.config.setdefault('myapp.param2', 'some default')
+
+# 获取值
+param  = app.config['myapp.param']
+param2 = app.config.get('myapp.param2', 'fallback value')
+
+# 在路由中从配置获取数据的例子
+@app.route('/about', view='about.rst')
+def about():
+    email = app.config.get('my.email', 'nomail@example.com')
+    return {'email': email}
+```
+
+`app` 对象并不是总是可用的，但是你可以在请求上下文中，使用 `request` 对象获取当前应用程序对象和它的配置
+
+```python
+from bottle import request
+def is_admin(user):
+    return user == request.app.config['myapp.admin_user']
+```
+
+#### 命名约定
+
+为了更好的开发，插件和应用程序应遵守一些简单的命名规则：
+
++ 所有的键名都应该是小写字符串，不能有特殊字符，但下划线除外。
++ 命名空间由 "." 分隔，比如 `namespace.field`。
++ Bottle 使用根命名空间进行自己的配置，插件应将所有变量存储在自己的命名空间中，例如 `sqlite.db`。
++ 自定义的配置也应该有单独的命名空间，比如 `myapp.*`
+  
+#### 从文件加载配置
+
+如果想使非程序员也能够配置程序，或想给程序带来高的可配置性，那么配置文件很有用。这里提供了配置文件的一种非常常见的语法：
+
+```ini
+[bottle]
+debug = True
+
+[sqlite]
+db = /tmp/test.db
+commit = auto
+
+[myapp]
+admin_user = defnull
+```
+现在可以通过 `load_config()` 方法加载这些配置文件：
+
+```python
+app.config.load_config('/etc/myapp.conf')
+```
+
+#### 从嵌套的字典加载配置
+
+另一个常用的方法使 `load_dict()`。这个方法将嵌套的字典转换为具有命名空间键和值的平面字典。
+
+```python
+# 从字典中加载配置
+app.config.load_dict({
+    'autojson': False,
+    'sqlite': { 'db': ':memory:' },
+    'myapp': {
+        'param': 'value',
+        'param2': 'value2'
+    }
+})
+
+assert app.config['myapp.param'] == 'value'
+
+# 从json文件中加载配置
+with open('/etc/myapp.json') as fp:
+    app.config.load_dict(json.load(fp))
+```
+
+#### 监听配置更改
+
+每次更改 Bottle 中的值时，都将触发应用程序对象上的 `config` 钩子。此钩子可用于在运行时对配置更改做出反应，例如重新连接到新数据库、更改后端服务上的调试设置 或者调整工作线程池的大小。钩子的回调函数接收两个参数(键, 新值)，并在字典中实际值更改之前调用，如果回调函数引发异常将取消更改，并保留原值。
+
+```python
+@app.hook('config')
+def on_config_change(key, value):
+    if key == 'debug':
+        switch_own_debug_mode_to(value)
+```
+钩子的回调函数不能改变要存储到字典中的值，只能有过滤器的用处。
+
+#### 过滤器和其他元数据
+
+`ConfigDict` 允许你存储元数据和配置键，目前定义了两个源字段：
+
++ **help**: 帮助或说明字符串，可由调试、内省或管理工具去帮助站点管理员配置应用程序。
++ **filter**: 接收和返回单个值的可调用对象，如果你为键定义了过滤器，那么存储到该键的所有值都先通过过滤器。过滤器可以对值进行检查和修改，或者抛出异常。下面看个例子：
+
+```python
+class SomePlugin(object):
+    def setup(app):
+        app.config.meta_set('some.int', 'filter', int)
+        app.config.meta_set('some.list', 'filter',
+            lambda val: str(val).split(';'))
+        app.config.meta_set('some.list', 'help',
+            'A semicolon separated list.')
+
+    def apply(self, callback, route):
+        ...
+
+import bottle
+app = bottle.default_app()
+app.install(SomePlugin())
+
+app.config['some.list'] = 'a;b;c'     # 自动转为列表
+app.config['some.int'] = 'not an int' # 抛出异常
+```
+
 ### 简单模板引擎
+
+
+
+
 ### API参考
 ### 可用插件列表
 
