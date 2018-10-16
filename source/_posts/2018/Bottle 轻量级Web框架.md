@@ -8,7 +8,7 @@ tags:
     - bottle
     - python
 photos:
-    - /uploads/photos/jjv8512oa1v816j4.jpg
+    - /uploads/photos/dasdefadsad.jpg
 ---
 
 
