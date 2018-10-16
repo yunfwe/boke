@@ -1135,7 +1135,7 @@ Python 是一种非常强大的语言，但它严格的缩进使它很难用于�
 
 ##### 内联表达式
 
-上面已经学习了 `{{...}}` 这样的语法，实际上可以在大括号中使用任何 Python 表达式：
+上面已经学习了两个大括号这样的语法，实际上可以在大括号中使用任何 Python 表达式：
 
     >>> template('Hello {{name}}!', name='World')
     'Hello World!'
@@ -1155,7 +1155,7 @@ Python 是一种非常强大的语言，但它严格的缩进使它很难用于�
 
 模板引擎允许你在模板中嵌入 Python 代码行或块。代码行以 `%` 开头，代码快由 `<%` 和 `%>` 包围：
 
-```tpl
+```html
 % name = "Bob"  # 行级别的 Python 代码
 <p>Some plain text in between</p>
 <%
@@ -1170,19 +1170,240 @@ Python 是一种非常强大的语言，但它严格的缩进使它很难用于�
 + 缩进被忽略，你可以根据需要在语句前尽可能多的放置空格，这样可以与周围的代码对其，提高可读性。
 + 缩进的块现在必须用 `%end` 显式关闭，比如：
 
-```tpl
+```html
 <ul>
   % for item in basket:
     <li>{{item}}</li>
   % end
 </ul>
 ```
+
 ##### 空白符控制
 
+代码块和代码行在模板中总是跨行的，在模板被渲染后，代码段会被删除，但是模板中并不会出现悬空的空白行，例如：
 
-### API参考
-### 可用插件列表
+```html
+<div>
+ % if True:
+  <span>content</span>
+ % end
+</div>
+```
+
+被渲染后成为：
+
+```html
+<div>
+  <span>content</span>
+</div>
+```
+
+如果想跳过代码段前面的换行符，可以使用双反斜杠结束文本：
+
+```html
+<div>\\
+ %if True:
+<span>content</span>\\
+ %end
+</div>
+```
+
+渲染后的效果是：
+
+```html
+<div><span>content</span></div>
+```
+
+#### 模板功能
+
+每个模板都预置了一些函数，可以帮助处理一些常见的功能。这些函数直接可用，无需安装或导入。
+
+注意：在 0.12 版本之前，`include()` 和 `rebase()` 是语法关键字，而不是函数。
+
+##### include
+
+**include(sub_template, **variables)**
+
+使用指定的变量渲染子模版，并将生成的文本插入到当前模板。该函数返回包含在子模板中传递或定义的局部变量的字典:
+
+```html
+% include('header.tpl', title='Page Title')
+Page Content
+% include('footer.tpl')
+```
+
+##### rebase
+
+**rebase(name, **variables)**
+
+将当前模板标记为稍后包含在不同的模板中，呈现当前模板后，其将生成的文本存储在一个名为 `base` 的变量中，并传递给基本模板，然后呈现该模板：
+
+```html
+% rebase('base.tpl', title='Page Title')
+<p>Page Content ...</p>
+```
+
+以下是 `base.tpl` 的内容：
+
+```html
+<html>
+<head>
+  <title>{{title or 'No title'}}</title>
+</head>
+<body>
+  {{!base}}
+</body>
+</html>
+```
+
+渲染的最终结果：
+
+    >>> from bottle import template
+    >>> t = '''% rebase('base.tpl', title='Page Title')
+    ... <p>Page Content ...</p>'''
+    >>> print(template(t))
+    <html>
+    <head>
+    <title>Page Title</title>
+    </head>
+    <body>
+    <p>Page Content ...</p>
+    </body>
+    </html>
+
+##### defined
+
+**defined(name)**
+
+测试一个变量名是否定义：
+
+    >>> t = '''% if defined("title"):
+    ... <p>defined title</>
+    ... % else:
+    ... <p>not defined title</p>
+    ... % end'''
+    >>> template(t)
+    '<p>not defined title</p>\n'
+    >>> template(t, title='test')
+    '<p>defined title</>\n'
+
+##### get
+
+**get(name, default=None)**
+
+和字典的 `get` 方法相似：
+
+    >>> t = '''% print(get('title'))'''
+    >>> template(t)
+    None
+    ''
+    >>> template(t, title='abc')
+    abc
+    ''
+
+##### setdefault
+
+**setdefault(name, default)**
+
+如果变量没有定义，创建它并提供一个默认值，否则返回它的值：
+
+    >>> t = '''% setdefault("title", "abc")
+    ... {{title}}'''
+    >>> template(t)
+    'abc'
+    >>> template(t, title='title')
+    'title'
 
 ## 部署
 
+目前我最喜欢的部署方式是使用 `gunicorn`，如果想通过协程的方式提高程序的并发，还会搭配 `gevent`。它们都可以很方便的通过 `pip` 安装
+
+### gunicorn
+
+#### 安装
+
+`pip install gunicorn`
+
+#### 配置文件
+
+gunicorn 最好通过配置文件的方式启动，配置文件可以是普通的键值对的文本，也可以是一个可执行的 Python 文件，采用 Python 文件的方式更灵活，所以我更喜欢这个。下面看一个配置文件的例子：
+
+```python
+import os
+import sys
+import multiprocessing
+
+DEBUG = os.environ.get('DEBUG','FALSE').upper() in ['TRUE','1']
+
+# gunicorn config
+path_of_current_file = os.path.abspath(__file__)
+path_of_current_dir = os.path.dirname(path_of_current_file)
+sys.path.insert(0, path_of_current_dir)
+worker_class = 'gevent'
+workers = multiprocessing.cpu_count()
+chdir = path_of_current_dir
+worker_connections = 1000
+timeout = 30
+max_requests = 2000
+loglevel = 'info'
+bind = "0.0.0.0:8000"
+pidfile = '%s/run/gunicorn.pid' % path_of_current_dir
+if DEBUG:
+    reload = True
+    debug = True
+    errorlog = "-"
+    accesslog = "-"
+else:
+    reload = False
+    debug = False
+    errorlog = '%s/logs/error.log' % path_of_current_dir
+    accesslog = '%s/logs/access.log' % path_of_current_dir
+```
+
+配置文件的代码很简单，会自动根据当前系统CPU核数来配置生成多少个工作进程，还可以采用多进程配合多线程的方式，但这里选择了使用协程用以更好的支持并发。
+
+并且配置文件编写了通过环境变量获取是否进入DEBUG模式的代码，让程序的配置更灵活。更多 `gunicron` 的配置说明可以查看官方文档：[点此打开](https://docs.gunicorn.org/en/stable/)
+
+#### 配合Gevent
+
+使用 Gevent 可以在几乎不修改任何代码的情况下让 Web 性能获取飙升，安装也非常简单 `pip install gevent`。在上面的配置文件中，`worker_class` 已经指定了要使用 `gevent`
+
+#### 启动程序
+
+`gunicorn` 的启动方式也非常简单，直接使用命令行将应用程序对象和配置文件传递给 `gunicorn`:
+
+**hello.py**
+
+```python
+import bottle
+
+app = bottle.Bottle()
+
+@app.route('/')
+def hello():
+    return 'Hello World'
+```
+
+**启动**:
+
+    root@ubuntu: # gunicorn hello:app -c config.py 
+    [2018-10-16 11:42:45 +0000] [46823] [INFO] Starting gunicorn 19.6.0
+    [2018-10-16 11:42:45 +0000] [46823] [INFO] Listening at: http://0.0.0.0:8000 (46823)
+    [2018-10-16 11:42:45 +0000] [46823] [INFO] Using worker: gevent
+    [2018-10-16 11:42:45 +0000] [46827] [INFO] Booting worker with pid: 46827
+    [2018-10-16 11:42:45 +0000] [46828] [INFO] Booting worker with pid: 46828
+    [2018-10-16 11:42:45 +0000] [46829] [INFO] Booting worker with pid: 46829
+    [2018-10-16 11:42:45 +0000] [46830] [INFO] Booting worker with pid: 46830
+
+但是默认是前台启动的，如果想启动后就放入后台执行，可以将 `daemon=True` 写入配置文件，或者直接在命令行添加 `-D` 参数。
+
+#### 使用 Nginx 做静态资源服务器
+
+gunicorn 是 WSGI 服务器，并不擅长处理静态资源，可以将静态文件交给 Nginx 处理。使用 Nginx 配置动静分离，将动态的请求转发到 gunicorn ，将静态资源直接返回给客户端，这样又可以提升不少的性能。
+
+
 ## 附录
+
+### 可用插件列表
+
+官网列出的 Bottle 现在可用的插件：[点击打开](http://bottlepy.org/docs/0.12/plugins/index.html)
