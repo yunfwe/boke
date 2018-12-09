@@ -11,9 +11,8 @@ photos:
 ---
 
 ## 简介
->   
-[<font color='#AAAAAA'>百度百科</font>]()
-<!-- more -->
+>   [<font color='#AAAAAA'>百度百科</font>]()
+>   <!-- more -->
 
 ```flow
 st=>start: Start|past:>http://www.google.com[blank]
@@ -34,7 +33,7 @@ c2(no)->op2->e
 ```
 
 
-	
+​	
 ## 环境
 
 ### 系统环境
@@ -58,3 +57,12 @@ c2(no)->op2->e
 ###### 六级
 
 ## 附录
+
+
+
+![1544023715725](../uploads/2018/MongoDB架构篇/1544023715725.png)
+
+![1544023810694](MongoDB架构篇.assets/1544023810694.png)
+
+
+
