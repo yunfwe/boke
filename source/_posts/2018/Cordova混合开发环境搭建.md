@@ -1,7 +1,6 @@
 ---
 title: Cordova混合开发环境搭建
 date: 2018-12-09 12:50:00
-updated: 2018-12-11
 categories: 
     - Cordova
 tags:
