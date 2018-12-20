@@ -1,3 +1,3 @@
-hexo clean && hexo g && gulp &&  bash -c   'rsync -avzz --delete -e "ssh -p 8050" public yunfwe@hinote.ga:/data/blog/' && hexo d && pause
+hexo clean && hexo g && gulp &&  bash -c   'rsync -avzz --delete -e "ssh -p 8050" public yunfwe@blog.yunfwe.cn:/data/blog/' && bash -c   'rsync -avzz --delete public root@www.yunfwe.cn:/data/wwwroot/' && hexo d && pause
 
 
