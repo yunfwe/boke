@@ -1407,3 +1407,9 @@ Vue 是如何保证加上 `scoped` 属性的 `style` 标签只作用于当前的
 使用效果：
 
 ![1545381267338](/uploads/2018/从零开始搭建Vue开发环境/1545381267338.png)
+
+### 项目文件打包下载
+
+[点击下载](/uploads/2018/从零开始搭建Vue开发环境/webapp-vue2.zip)
+
+解压后进入 `webapp` 目录，执行 `npm install` 或者 `cnpm install` 安装依赖。
