@@ -32,7 +32,7 @@ photos:
 ### CSS 基础
 > 这里讲诉的 CSS 基础重点在于  **三大特性**、**盒子模型**、**浮动** 和 **定位** 这几个方面，其他的背景啊、边框啊也都是细节，而这几个才是整个页面布局的基础。
 
-#### 标签显示模式
+#### 显示模式
 
 网页的标签非常多，并且不同的标签用于不同的场合，因此不同的标签也有不同的显示模式。比如两个 `a` 标签默认是可以放在一行显示的，而 `p` 标签则不可以，默认在页面上独占一行或多行。
 
@@ -231,7 +231,7 @@ photos:
 
 ![1545670550429](/uploads/2018/Web页面布局/1545670550429.png)
 
-#### CSS 三大特性
+#### 三大特性
 
 ##### 层叠性
 
@@ -443,11 +443,394 @@ CSS 使用一套权重系统来计算优先级，使用 `0,0,0,0` 这种值来�
 
 #### 盒子模型
 
-#### 浮动
+页面上每一个元素都像是一个盒子，盒子里面放的就是我们要展示的文字、图片或者其他的盒子。然后我们通过摆放盒子的位置来使内容合理的呈现在页面上。
 
-#### 定位
 
-### CSS 布局方式
+##### 内外边距和边框
+在现代浏览器中，每一个盒子都由 **内容区域**、**内边距**、**边框**、**外边距** 组成。
+
+![1545704369752](/uploads/2018/Web页面布局/1545704369752.png)
+
+盒子模型可以比喻成我们拆快递，快递包装的厚度可以想象为边框，快递为了保护里面的东西会有一些填充物，这个填充物就可以当成内边距，而快递里面的东西就是实际的内容了。如果有多个快递，快递与快递之间的距离就是外边距了。下面看代码：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .box {
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            border: 5px solid pink;
+            margin: 15px;
+            background-color: blue;
+            display: inline-block
+        }
+    </style>
+</head>
+<body>
+    <div class="box"></div>
+    <div class="box"></div>
+</body>
+</html>
+```
+
+这里将两个 `div` 元素设置为行内块显示，然后开发者模式查看他们的盒模型：
+
+![1545705114625](/uploads/2018/Web页面布局/1545705114625.gif)
+
+可以看到，给元素设置的宽高实际上是给盒子的内容区域设置的，而元素占的实际空间大小是要加上内外边距还有边框的。我们也可以单独为每一个边设置不同的内外边距还有边框，或者通过将盒子左右外边距设置为 `auto` 来让浏览器自动计算实现盒子居中显示：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .box {
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            border: 5px solid pink;
+            margin: 15px auto;
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="box"></div>
+</body>
+</html>
+```
+
+![1545706594946](/uploads/2018/Web页面布局/1545706594946.png)
+
+##### 块元素的上下外边距合并
+
+现在 `.box` 的显示模式是块元素了，如果相邻的两个块元素，上下外边距会有什么不同呢？
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .box {
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            border: 5px solid pink;
+            margin: 15px auto;
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="box"></div>
+    <div class="box"></div>
+</body>
+</html>
+```
+
+![1545706594946](/uploads/2018/Web页面布局/1545706594948.gif)
+
+如果两个盒子的外边距不同，则会以外边距最大的元素为准：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .box {
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            border: 5px solid pink;
+            margin: 15px auto;
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="box"></div>
+    <div class="box" style="margin: 25px auto"></div>
+</body>
+</html>
+```
+
+![1545707735409](/uploads/2018/Web页面布局/1545707735409.gif)
+
+如何消除这个影响呢？也很简单，用一个父盒子将其中一个盒子嵌套起来，并给父盒子设置一个 `overflow: hidden`：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .box {
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            border: 5px solid pink;
+            margin: 15px auto;
+            background-color: blue;
+        }
+        .father {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box"></div>
+    </div>
+    <div class="box" style="margin: 25px auto"></div>
+</body>
+</html>
+```
+![1545707735410](/uploads/2018/Web页面布局/1545707735410.gif)
+
+添加 `overfiow: hidden` 可以防止 `margin` 合并的原理是 `.father` 的盒子触发了浏览器的 BFC 机制，形成了自己的独立空间，但是它的元素占用空间是由里面的子元素撑起来的，父元素的外边距为 0，所以也不会与下一行的块元素发生重叠（如果给父元素设置了外边距，依然会跟下一行的重叠）。那么什么是 BFC 呢？
+
+##### BFC（块级格式化上下文）
+
+BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不会影响到外面的元素。反之也如此。包括浮动，和外边距合并等等，因此，有了这个特性，我们布局的时候就不会出现意外情况了。
+
+元素如何才能形成 BFC 呢？满足如下几个条件之一即可：
+
++ `float` 的值不为 `none`
++ `position` 的值不为 `static` 或 `relative`
++ `display` 的值为 `table-cell`、`table-caption`、`inline-block`、`flex` 或 `inline-flex`
++ `overflow` 的值不为 `visibility`
+
+利用 BFC 我们能做些什么呢？
+
+1. 上一节的例子已经看到，BFC 可以防止两个元素上下外边距合并的问题。
+2. 清除父元素内部的子元素浮动问题。
+3. 父元素内部右侧盒子自适应。
+
+下面看一个例子：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 350px;
+            /* height: 350px; */
+            border: 1px solid blue;
+            /* overflow: hidden; */
+            /* display: flex; */
+            /* position: absolute; */
+            /* float: left; */
+        }
+        
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background: #f66;
+            /* float: left; */
+        }
+        
+        .box2 {
+            height: 200px;
+            width: 200px;
+            background: #fcc;
+            display: none;
+            /* overflow: hidden; */
+        }
+        .other {
+            height: 120px;
+            width: 120px;
+            background-color: #649ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2">
+            文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+            文字文字文字文字文字文字文字文字文字文字文字文字文字文字文字
+        </div>
+    </div>
+    <div class="other"></div>
+</body>
+</html>
+```
+
+当前元素都一行一行的正常排列着：
+
+![1545714903936](/uploads/2018/Web页面布局/1545714903936.png)
+
+当我们给 `.box1` 添加浮动，一切都改变了：
+
+![1545714972297](/uploads/2018/Web页面布局/1545714972297.png)
+
+`.father` 的内容高度变为了 0，变成了只剩靠 2px 的边框维持的一条线。`.box1` 与 `.other` 发生了重叠，这个就是因为父元素内部子元素浮动产生的问题，我们看看如何来解决这个问题：
+
+![1545715245226](/uploads/2018/Web页面布局/1545715245226.png)
+
+我们给 `.father` 设置了高度，这样看似解决了问题，但是这个高度不是因为内部子元素自动撑开的，而是我们手动设置的，如果内部子元素的高度发生变化，我们还得相应的修改父元素高度以适应，这样显然不是太合理。接下来看看如何使用 BFC 来解决这个问题：
+
+![1545715245227](/uploads/2018/Web页面布局/1545715245227.gif)
+
+首先尝试了使用 `overflow: hidden` 的方式，似乎完美解决了问题，但是如果内部盒子的宽度大于父盒子，则会被隐藏。接着使用 `display: flex` 的方式，这使用了 `flex` 布局。当使用了 `position: absolute` 和 `float: left` 的时候，虽然父元素形成了 BFC，并由内部子元素自动撑开了高度，但是却脱离了文档流，依然与下面的元素发生重叠。
+
+在看看最后一个可以利用 BFC 解决的问题：“父元素内部右侧盒子自适应”。首先给父元素提供一个高度，然后将 `.box2` 的 `display: none` 状态取消：
+
+![1545715245228](/uploads/2018/Web页面布局/1545715245228.gif)
+
+可以看到由于 `.box1` 的浮动，与 `.box2` 产生了重叠，并让 `.box2` 的文字与它产生了环绕效果。当我们让 `.box2` 形成 BFC 会产生什么效果呢？
+
+![1545715245229](/uploads/2018/Web页面布局/1545715245229.gif)
+
+当使用 `overflow: hidden` 触发 BFC 后，`.box2` 的左边框紧贴着 `.box1` 的右边框。当取消手动指定的 `.box2` 宽度后，`.box2` 自动适应了 `.father` 剩余的宽度。
+
+##### 更改盒模型
+
+默认我们对块元素设置宽高是内容区域的宽高，如果对这个盒子进行增加内边距和边框，都会使这个元素变大，这个默认模型是 `content-box`。还有一个常用的模型，让内边距和边框都包含到元素的宽高中，这种模型就是 `border-box`。
+
+我们可以通过 `box-sizing` 来更改盒子模型：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+            padding: 10px;
+            border: 5px solid gray;
+            margin: 20px;
+        }
+        .box2 {
+            box-sizing: border-box;
+            width: 100px;
+            height: 100px;
+            background-color: blue;
+            padding: 10px;
+            border: 5px solid gray;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box1"></div>
+    <div class="box2"></div>
+</body>
+</html>
+```
+
+![1545723227167](/uploads/2018/Web页面布局/1545723227167.png)
+
+`.box2` 由于使用了 `border-box` 模型，所以去掉边框和内边距占用的区域，内容区域只剩下 `70 × 70` 了，看起来也比 `.box1` 小了很多。
+
+#### 定位机制
+
+##### 文档流
+
+不给元素添加浮动或者定位的话，元素就放在文档流（或标准流）中。文档流实际上就是网页内的元素从左往右，从上往下依次排列的布局方式。如果给某个元素添加了浮动或者定位，那么它的显示就不会按照文档流的规则，我们称之为：脱离文档流。
+
+当某个元素脱离的文档流，就不会占用文档流的位置了，所以经常会发现多个元素发生了重叠的现象。脱离了文档流的元素的层级会比文档流中的元素层级高，因此大多情况下都是脱离文档流的元素遮住文档流的元素。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: pink;
+            float: left;
+        }
+        .box2 {
+            width: 120px;
+            height: 120px;
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="box1"></div>
+    <div class="box2"></div>
+</body>
+</html>
+```
+
+![1545727983700](/uploads/2018/Web页面布局/1545727983700.png)
+
+##### 浮动
+
+浮动最早是用来控制图片，为了让其他元素特别是文字实现环绕图片的效果。后来发现浮动可以让任何盒子排在一行，而且中间没有间隙（`inline-block` 的两个盒子中间有间隙），慢慢的人们就会浮动的特性来布局了。
+
+元素设置了浮动样式，会脱离文档流的控制，并移动到浮动样式设置的地方。浮动元素依然受限于父级元素，子元素浮动，父元素依然在文档流中。如果多个子元素都添加了浮动，那么这些元素都有了 `inline-block` 元素的特性
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 300px;
+            border: 1px solid blue;
+            padding: 10px;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+            float: left;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            float: left;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <span class="box3"></span>
+    </div>
+</body>
+</html>
+```
+
+![1545729291972](/uploads/2018/Web页面布局/1545729291972.png)
+
+可以看到，所有添加了浮动的标签，都有了行内块元素的特性，但是会两边贴合没有缝隙。元素会按照浮动样式的值进行漂移，如果是 `left` 则会贴着父元素的左边排列，`right` 会贴着父元素的右边排列。但是子元素不会超出父元素的内边距距离。
+
+浮动的特性：脱离文档流、不占用原本在文档流中的位置、会影响原本文档流的布局、只有左右浮动或者不浮动。
+
+##### 定位
+
+我们如果想移动某个元素的位置，或者将某个元素直接放置到页面中一个固定的位置，如果不使用定位就非常麻烦或者不可能完成了。就连页面中各种各样的动画，也几乎都是通过定位来做的。
+
+
+### CSS 布局
 https://www.jianshu.com/p/090ada2f3080
 
 
