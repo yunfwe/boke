@@ -15,7 +15,7 @@ photos:
 
 
 ## 简介
-> 使用现代前端技术开发的应用，不管是 Web 页面，还是混合开发的手机 APP，都离不开页面元素的布局。而布局又可以说是页面开发里最麻烦的地方，不仅要兼容不同的设备，还要兼容不同的浏览器，还很可能一不小心改错了一个值就造成整个页面的雪崩。这里汇总下关于页面布局的基础知识以及实际开发中可能会遇到的问题。
+> 使用现代前端技术开发的应用，不管是 Web 页面，还是混合开发的手机 APP，都离不开页面元素的布局。而布局又可以说是页面开发里最麻烦的地方，不仅要兼容不同的设备，还要兼容不同的浏览器，还很可能一不小心改错了一个值就造成整个页面的雪崩。这里汇总下关于页面布局的基础知识以及一些开发中的经验。
 <!-- more -->
 
 
@@ -27,7 +27,7 @@ photos:
 | Chrome浏览器 | 70 |
 
 ## 教程
-> 这里假使读者已经有了基础的 CSS 和 JavaScript 知识。如果对这些基础知识还没有概念的话，如果继续往下看，可能会觉得比较难以理解和接受。
+> 这里假使读者已经有了基础的 CSS 知识。如果对这些基础知识还没有概念的话，如果继续往下看，可能会觉得比较难以理解和接受。
 
 ### CSS 基础
 > 这里讲诉的 CSS 基础重点在于  **三大特性**、**盒子模型**、**浮动** 和 **定位** 这几个方面，其他的背景啊、边框啊也都是细节，而这几个才是整个页面布局的基础。
@@ -182,6 +182,70 @@ photos:
 + 默认宽度是它本身内容把它撑开的宽度。
 + 宽高、内外边距都可以控制。
 
+顺便一提 `img` 标签和文字在一行时的一些显示：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        img {
+            width: 150px;
+            height: 150px;
+            border: 1px solid #3280f3;
+            /* vertical-align: bottom */
+        }
+        span {
+            border: 1px solid #d052d3;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <img src="css.png">
+        <span>一些文字</span>
+    </div>
+</body>
+</html>
+```
+![1545668809400](/uploads/2018/Web页面布局/1545668809400.gif)
+
+`vertical-align` 可以设置行内和行内块元素垂直对其的方式。`img` 和其他行内元素默认的对齐方式并不是底线对其的！所以可以看到 `img` 比 `span` 高出了几个像素。
+同样这个问题也会出现，当使用一个 `div` 去包裹 `img` 的时候，`img` 并不是铺满整个 `div` 的。而是底边会留有几个像素：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        div {
+            border: 1px solid #3280f3;
+            display: inline-block;
+        }
+        img {
+            width: 150px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <img src="black.png">
+    </div>
+</body>
+</html>
+```
+
+![1545751283265](/uploads/2018/Web页面布局/1545751283265.png)
+
+解决方法也很简单，将 `img` 的垂直对其方式设置为底边对其，或者 将 `img` 的显示模式转换为块元素
+
 ##### 显示模式转换
 
 通过 `display` 样式可以转换元素的默认显示模式：
@@ -222,6 +286,33 @@ photos:
 ```
 ![1545670158259](/uploads/2018/Web页面布局/1545670158259.png)
 
+上面的 `img` 显示问题也可以通过显示转换来解决：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        div {
+            border: 1px solid #3280f3;
+        }
+        img {
+            width: 150px;
+            height: 150px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <img src="black.png">
+    </div>
+</body>
+</html>
+```
+
+![1545751535135](/uploads/2018/Web页面布局/1545751535135.png)
 
 ##### 其他显示模式
 
@@ -230,6 +321,7 @@ photos:
 浏览器开发者模式中可以看到所有支持的显示模式：
 
 ![1545670550429](/uploads/2018/Web页面布局/1545670550429.png)
+
 
 #### 三大特性
 
@@ -831,6 +923,16 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
 
 元素的定位属性主要包括定位模式和边偏移两部分，定位属性常用的有四种：`static`，`relative`，`absolute`，`fixed`。边偏移样式：`top`，`bottom`，`left`，`right`。一般偏移样式 `top` 和 `bottom` 只使用一个就够了，`left` 和 `right` 同理，不要既给元素设置了 `left` 然后又设置了 `right`。
 
+偏移量不仅可以使用 `px` 等单位，还可以使用百分比：
+
+```css
+.box {
+    top: 20px;
+    left: 10%;
+}
+```
+
+并且元素如果添加了定位（除了static定位）都会像给元素添加了浮动一样，将元素模式转换为行内块模式。因此即使是行内元素，也可以直接设置高度和内外上下边距。
 
 ###### static
 
@@ -838,7 +940,7 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
 
 ###### relative
 
-相对定位，相对与自身原本在文档流中的位置进行边偏移。不脱离文档流，元素原本的占位依然保留。
+相对定位：相对与自身原本在文档流中的位置进行边偏移。不脱离文档流，元素原本的占位依然保留。
 
 ```html
 <!DOCTYPE html>
@@ -885,9 +987,518 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
 
 ![1545729291973](/uploads/2018/Web页面布局/1545729291973.gif)
 
-相对于 `top` 设置偏移时，如果值小于 0 则向上偏移，如果值大于 0 则向下偏移。
+相对于 `top` 设置偏移时，如果值小于 0 则向上偏移，如果值大于 0 则向下偏移。`left` 如果值小于 0 则向左偏移，如果值大于 0 则向右偏移。
 
-### CSS 布局
+###### absolute
+
+绝对定位：将元素根据最近的已经定位（相对、绝对、固定都可以）的父级或祖先级元素进行定位，如果所有的父元素都没有定位，则以 document 文档为基准进行定位。完全脱离文档流，元素原本的占位不保留。
+
+因此如果想让某个元素以它的某个父或祖先元素进行定位，就需要给这个元素设置绝对定位，并给父或祖先元素也设置合适的定位方式，如果不想改变父或祖先元素的位置，也不想让父或祖先元素脱离文档流，那最好的方式就是给父或祖先元素设置相对定位。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 1000px;
+            border: 1px solid blue;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+这里将 `.father` 的长度设置为 `1000px` 使页面产生滚动条，然后将 `.box2` 改为绝对定位：
+
+![1545729291974](/uploads/2018/Web页面布局/1545729291974.gif)
+
+由于 `.box2` 的祖先都没有设置定位，因此它的绝对定位是以 `document` 整个页面为基准。完全脱离了文档流，所以它原来的位置被 `.box3` 所占据，并且当文档滚动时它也跟着滚动。如果想让它以 `.father` 元素为基准进行定位，又不想改变 `.father` 元素的位置，那么就最好给 `.father` 元素设置相对定位：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 1000px;
+            border: 1px solid blue;
+            position: relative;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+![1545729291975](/uploads/2018/Web页面布局/1545729291975.gif)
+
+`.box2` 以 `.father` 为基准定位，所以覆盖了 `.box1`。如果想要元素相对于父元素水平和垂直居中对齐，可以将四个修改偏移的样式都设置为 0 ，然后将 `margin` 设置为 `auto`，看下面示例：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 400px;
+            border: 1px solid blue;
+            position: relative;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            position: absolute;
+            /* top: 0px; */
+            /* left: 0px; */
+            /* bottom: 0; */
+            /* right: 0; */
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+    </div>
+</body>
+</html>
+```
+![1545729292975](/uploads/2018/Web页面布局/1545729292975.gif)
+
+通过不同的偏移组合，可以将 `.box1` 定位到父元素中的 8 个位置上。
+
+###### fixed
+
+固定定位：永远以浏览器窗口为基准，不随页面滚动而滚动。完全脱离文档流，元素原本的占位不保留。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 1000px;
+            border: 1px solid blue;
+            position: relative;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            position: fixed;
+            top: 0px;
+            left: 0px;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+![1545729291976](/uploads/2018/Web页面布局/1545729291976.gif)
+
+将 `.box2` 设置为固定定位，可以看到它并不随着页面的滚动而滚动。我们经常看到的页面双侧广告，是不是就是这样子的？固定定位也可以像绝对定位那样，通过将四个偏移样式都设置为 0，然后将 `margin` 设置为 `auto` 的方式实现元素相对于浏览器窗口永远水平和垂直居中：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 400px;
+            border: 1px solid blue;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+![1545741622908](/uploads/2018/Web页面布局/1545741622908.png)
+
+###### sticky
+
+CSS3 新增的样式，粘性定位，这个就比较有意思了。它相当于 `relative` 和 `fixed` 混合。最初会被当作是 `relative`，相对于原来的位置进行偏移。一旦超过一定阈值之后，会被当成 `fixed`，相对于视口进行定位。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 1000px;
+            height: 1000px;
+            border: 1px solid blue;
+            position: relative;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            position: sticky;
+            top: 20px;
+            left: 20px;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+![1545742622908](/uploads/2018/Web页面布局/1545742622908.gif)
+
+有点意思吧！不是实际好像用的并不多。
+
+##### z-index 层级
+
+如果对元素使用了定位，就非常容易发生元素重叠的情况，我们可以使用 `z-index` 来调整定位元素的堆叠顺序，其取值可以为负整数、0 和正整数，值越大，则定位的元素越居上，如果值相同，则后定义的元素居上。
+
+`z-index` 的默认值是 0，并且只有相对定位、绝对定位和固定定位才有此属性。其余标准流，浮动，静态定位都无此属性，也不可指定此属性。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 400px;
+            border: 1px solid blue;
+            position: relative;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+            position: absolute;
+            z-index: 0;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 0;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+![1545741622910](/uploads/2018/Web页面布局/1545741622910.gif)
+
+
+#### 显示与隐藏
+
+CSS 中可以控制元素显示与隐藏的样式最常用的有三个，一个是 `display`，一个是 `visibility`，另一个是 `overflow`。
+
+##### display
+
+如果将元素的 `display` 设置为 `none` 将会使这个元素彻底的隐藏掉，元素原来的位置也不再保留：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 400px;
+            border: 1px solid blue;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            display: none;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+![1545746851690](/uploads/2018/Web页面布局/1545746851690.png)
+
+可以看到 `.box3` 显示在原来 `.box2` 的位置。于此对应的是，将一个隐藏元素的 `display` 设置为原来的显示模式（一般是 `block`），元素就可以再出现了。
+
+##### visibility
+
+`visibility` 与 `display` 不同的是，隐藏元素后，会保留原来的位置。`visibility` 的值为 `hidden` 时元素隐藏不可见，值为 `visible` 时元素显示出来。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 400px;
+            border: 1px solid blue;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            visibility: hidden;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+![1545747830399](/uploads/2018/Web页面布局/1545747830399.png)
+
+##### overflow
+
+`overflow` 和上面两个的作用就不太一样了，它主要用于设置当对象的内容超过其指定高度及宽度时如何管理内容。
+
++ `overflow: visible`：默认值，不剪切内容，也不添加滚动条。
++ `overflow: auto`：超出自动添加滚动条，否则不加
++ `overflow: hidden`：超出部分隐藏掉
++ `overflow: scroll`：不管是否超出，都显示滚动条
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        [class^=box] {
+            display: inline-block;
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+            vertical-align: top;
+        }
+        .content {
+            margin: 10px auto;
+            width: 30px;
+            height: 200px;
+            background-color: #4ed869;
+        }
+        .box1 {
+            overflow: visible;
+        }
+        .box2 {
+            overflow: auto;
+        }
+        .box3 {
+            overflow: hidden;
+        }
+        .box4 {
+            overflow: scroll;
+        }
+    </style>
+</head>
+<body>
+    <div class="box1">
+        <div class="content"></div>
+    </div>
+    <div class="box2">
+        <div class="content"></div>
+    </div>
+    <div class="box3">
+        <div class="content"></div>
+    </div>
+    <div class="box4">
+        <div class="content"></div>
+    </div>
+</body>
+</html>
+```
+![1545749729658](/uploads/2018/Web页面布局/1545749729658.png)
+
+#### 尺寸单位
+
+页面开发中，我们用的最多的就是使用 `px` 作为单位来编写样式了，偶尔也会用到百分比来写一些元素自适应父元素的样式。但是在移动开发中，为了让一套页面可以适应多套屏幕尺寸，`px` 就不太适用了
+
+
+
+### 响应式布局
+
+#### 栅格布局
+#### 流式布局
+#### flex布局
+#### 媒体查询
+#### rem/em布局
+
 https://www.jianshu.com/p/090ada2f3080
 
 
