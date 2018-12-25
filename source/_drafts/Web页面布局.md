@@ -829,6 +829,63 @@ BFC 就是页面上的一个隔离的独立容器，容器里面的子元素不�
 
 我们如果想移动某个元素的位置，或者将某个元素直接放置到页面中一个固定的位置，如果不使用定位就非常麻烦或者不可能完成了。就连页面中各种各样的动画，也几乎都是通过定位来做的。
 
+元素的定位属性主要包括定位模式和边偏移两部分，定位属性常用的有四种：`static`，`relative`，`absolute`，`fixed`。边偏移样式：`top`，`bottom`，`left`，`right`。一般偏移样式 `top` 和 `bottom` 只使用一个就够了，`left` 和 `right` 同理，不要既给元素设置了 `left` 然后又设置了 `right`。
+
+
+###### static
+
+文档流中的所有元素都默认是这个定位方式，而且没法通过边偏移样式进行改变元素位置。
+
+###### relative
+
+相对定位，相对与自身原本在文档流中的位置进行边偏移。不脱离文档流，元素原本的占位依然保留。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        .father {
+            width: 400px;
+            height: 300px;
+            border: 1px solid blue;
+        }
+        .box1 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff9d6f;
+        }
+        .box2 {
+            width: 100px;
+            height: 100px;
+            background-color: #8000ff;
+            position: relative;
+            top: 0px;
+            left: 0px;
+        }
+        .box3 {
+            width: 100px;
+            height: 100px;
+            background-color: #ff2f97;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1"></div>
+        <div class="box2"></div>
+        <div class="box3"></div>
+    </div>
+</body>
+</html>
+```
+
+给 `.box2` 添加了相对定位，并与原来位置的顶部保持 `0px` 的像素偏移和相对与原来位置的左边保持 `0px` 的像素偏移，然后浏览器开发者模式中手动调整这两个值试试看：
+
+![1545729291973](/uploads/2018/Web页面布局/1545729291973.gif)
+
+相对于 `top` 设置偏移时，如果值小于 0 则向上偏移，如果值大于 0 则向下偏移。
 
 ### CSS 布局
 https://www.jianshu.com/p/090ada2f3080
