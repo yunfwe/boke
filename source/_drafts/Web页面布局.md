@@ -1487,7 +1487,209 @@ CSS 中可以控制元素显示与隐藏的样式最常用的有三个，一个�
 
 #### 尺寸单位
 
-页面开发中，我们用的最多的就是使用 `px` 作为单位来编写样式了，偶尔也会用到百分比来写一些元素自适应父元素的样式。但是在移动开发中，为了让一套页面可以适应多套屏幕尺寸，`px` 就不太适用了
+##### 常用单位
+
+页面开发中，我们用的最多的就是使用 `px` 作为单位来编写样式了，偶尔也会用到百分比来写一些元素自适应父元素的样式。但是在移动开发中，为了让一套页面可以适应多套屏幕尺寸，`px` 就不太适用了。
+
+![1545789503327](/uploads/2018/Web页面布局/1545789503327.png)
+
+图中可以看到，当我们给元素设置宽高时，IDE 给我们显示出了所有可用的单位。
+
+<table><thead><tr><th width="100px">单位</th><th>描述</th></tr></thead><tbody><tr><td>%</td><td>相对于父元素相同属性的百分比。</td></tr><tr><td>px</td><td>像素点，跟屏幕的物理性质相关。</td></tr><tr><td>in</td><td>英寸，跟 px 的换算是 1in == 96px （基于屏幕为 96 DPI计算）</td></tr><tr><td>cm</td><td>厘米，并非生活中的厘米，这里 1cm == 37.8px</td></tr><tr><td>mm</td><td>毫米，1mm == .1cm == 3.78px</td></tr><tr><td>em</td><td>基于父容器的字体大小，font-size 是多少，1em就是多少</td></tr><tr><td>rem</td><td>与 em 类似，不过 rem 是基于根元素（html）的字体大小</td></tr><tr><td>pt</td><td>印刷行业常用单位，1pt == 1/72英寸</td></tr></tbody></table>
+
+##### 屏幕 DPI（PPI）
+
+现在电脑屏幕的主流分辨率都是 `1920 × 1080` 了，而手机屏幕也大多都是这个分辨率，那么电脑上看到的 100px 和手机看到的 100px 能一样长吗？答案当然是不一样。
+
+![1545794545664](/uploads/2018/Web页面布局/1545794545664.png)
+
+我们常用英寸来表示屏幕尺寸（屏幕对角线长度），比如现在手机屏幕尺寸大多都是 5.5 英寸，笔记本电脑的屏幕有 13英寸、15英等，显示器的尺寸就更大了，21英寸、23英寸、甚至现在的电视剧都 55英寸以上。屏幕分辨率则以像素作度量的，屏幕分辨率这些年也越来越高，当年的 720p 的屏幕，现在 1080p 的分辨率是主流，甚至高端产品有 2k 屏甚至 4k 屏。
+
+屏幕尺寸的不同和分辨率的不同，则构成了各种设备的差异。DPI 是硬刷行业中用来表示打印机每英寸可以喷的墨汁点数，显示器也借鉴了这个概念，不过是将墨汁点换成了像素。屏幕英寸一般指对角线，在知道屏幕宽和高的像素后，可以通过勾股定理计算出每英寸可容纳的像素点，这个就是 DPI（PPI）。
+
+![img](/uploads/2018/Web页面布局/799396908.png)
+
+```javascript
+function ppi(w,h,n){
+    let p = Math.sqrt(w**2+h**2) / n
+    return Math.round(p)
+}
+```
+
+我们以 23 英寸的显示器屏幕，`1920 × 1080` 的分辨率，计算下这个屏幕的 DPI（PPI）：
+
+    > console.log(ppi(1920,1080,23))
+    < 96
+
+所以上面常用单位中的 1 英寸是以 96px 来计算的，再计算下我当前手机的 DPI（PPI）：
+
+    > ppi(1920,1080,5.5)
+    < 401
+
+![1545798490089](/uploads/2018/Web页面布局/1545798490089.png)
+
+和在手机上查询到的的确相同。如果想让显示器上通过肉眼看到的元素大小和手机屏幕上看到的元素大小差不多，那么理论上就需要让手机上的元素增大 `401/96` 倍，但实际并没有这么简单，影响手机上显示元素的大小和电脑上显示不同的因素还有很多。
+
+##### 设备独立像素
+
+前面讲到的显示器分辨率 `1920 × 1080` 这个指实际的物理像素，是屏幕渲染图像的最小单位。而我们在 CSS 中编写的 `px` 实际上是一种逻辑上的像素。这个逻辑上的像素就是设备独立像素，可以由操作系统或浏览器来管理物理像和素设备独立像素的比例（DPR）。通过 BOM 的 `devicePixelRatio` 属性可以查询到物理像素和设备独立像素的实际比例：
+
+    > window.screen.width
+    < 1920
+    > window.screen.height
+    < 1080
+    > window.devicePixelRatio
+    < 1
+
+默认是 1:1，所以我们在 CSS 样式中写的 `100px` 和实际物理像素是相同的。当我们在页面上调整缩放比例时，页面元素也跟着变化。当缩放比达到 2 倍的时候，设备独立像素是物理像素的 4 倍：`(200×200)/(100×100)`。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        div {
+            display: inline-block;
+        }
+        .box {
+            width: 100px;
+            height: 100px;
+            background-color: #23d3e7;
+        } 
+    </style>
+</head>
+<body>
+    <div class="box"></div>
+</body>
+</html>
+```
+
+![1545798490090](/uploads/2018/Web页面布局/1545798490090.gif)
+
+DPR（物理像素/设备独立像素）控制着由我们在 CSS 中编写的 `px` 到物理像素的映射比例：
+
++ 当设备像素比为1:1时，使用1（1×1）个设备像素显示1个CSS像素
++ 当设备像素比为2:1时，使用4（2×2）个设备像素显示1个CSS像素
++ 当设备像素比为3:1时，使用9（3×3）个设备像素显示1个CSS像素
+
+![img](/uploads/2018/Web页面布局/1502532540.png)
+
+这样，在相同尺寸高清屏上和普通屏上，通过不同的 DPR 就可以让两个元素看起来大小差不多了。而设备独立像素和 DPR 就是为了解决随着技术发展，屏幕不断更新，不同 DPI（PPI）的屏幕显示图像大小差距的问题。
+
+智能手机和平板设备，厂家在设备出厂时已经预设好了 DPR，同样可以通过 `window.devicePixelRatio` 来获取。需要注意的是，大多数的移动设备通过 `window.screen.width` 和 `window.screen.height` 无法像 PC 设备一样获取准确的屏幕物理像素！
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+</head>
+<body>
+    <p class="info"></p>
+    <script>
+        let info = document.querySelector(".info")
+        info.innerHTML = ""
+        info.innerHTML += "devicePixelRatio: " + window.devicePixelRatio
+        info.innerHTML += "<br>screen.width: " + window.screen.width
+        info.innerHTML += "<br>screen.height: " + window.screen.height
+        info.innerHTML += "<br>documentElement.clientWidth: " + 
+                            document.documentElement.clientWidth;
+        info.innerHTML += "<br>documentElement.clientHeight: " + 
+                            document.documentElement.clientHeight;
+    </script>
+</body>
+</html>
+```
+
+![1545812771712](/uploads/2018/Web页面布局/1545812771712.png)
+
+Apple 6s Plus:
+![1545813056095](/uploads/2018/Web页面布局/1545813056095.png)
+
+
+Vivo X9:
+![1545813736619](/uploads/2018/Web页面布局/1545813736619.png)
+
+浏览器上，通过 `window.screen` 获取了屏幕的物理像素，通过 `window.documentElement` 获取了页面文档的像素尺寸。而在手机上，却获取了两对奇怪的值。安卓手机的不难发现，`screen.width × devicePixelRatio` 刚好等于物理像素的 `1080`，`screen.height × devicePixelRatio` 刚好等于物理像素的 `1920`，而苹果手机则设置的大了一些。这个就涉及到了视口的概念。
+
+##### 视口（viewport）
+
+视口的概念是在移动设备才存在的。由于移动设备的屏幕一般都比较小，而且大部分网站都是为 PC 端准备的，移动设备不得不做一些处理才能让 PC 的页面正常显示在手机上。
+
+###### 布局视口
+
+布局视口（`layout viewpoer`）是指我们可以进行页面布局的区域，相当于浏览器的窗口大小决定页面如何布局。移动设备的浏览器窗口是没法改变大小的，默认宽度就是屏幕的宽度。但是移动厂商并没有直接将屏幕的物理像素宽度直接给布局视口用，而是使用了一个默认值，并允许我们自行设置。这个值在大多数的设备上都是 `980px` 也就是我们通过 `document.documentElement.clientWidth` 获取的值。一般情况下我们都不关心页面的高度，因为如果高度超出会自动出现滚动条。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        div {
+            width: 245px;
+            height: 200px;
+            float: left;
+        }
+        .box1 {
+            background-color: #23d3e7;
+        } 
+        .box2 {
+            background-color: #2b2bff;
+        }
+        .box3 {
+            background-color: #777777;
+        }
+        .box4 {
+            background-color: #ff3e9e;
+        }
+    </style>
+</head>
+<body>
+    <div class="box1"></div>
+    <div class="box2"></div>
+    <div class="box3"></div>
+    <div class="box4"></div>
+</body>
+</html>
+```
+
+![1545816231699](/uploads/2018/Web页面布局/1545816231699.png)
+
+4 个宽度为 `245px` 的盒子刚好平铺一行，当我们把其中一个盒子的宽度增加 1 像素，立马最后一个盒子被挤下去了：
+
+![1545816429624](/uploads/2018/Web页面布局/1545816429624.png)
+
+稍后再讲如何自定义这个值。
+
+###### 理想视口
+
+理想视口（`ideal viewport`）是设备的屏幕区域，是以设备的独立像素作为单位，并由 `devicePixelRatio` 的值自动映射为屏幕物理像素。这个值是不可能被改变的，我们可以通过 `window.screen.width` 和 `window.screen.height` 来获取。这也刚好解释了为什么获取到的值刚好或差不多比屏幕物理像素小 `devicePixelRatio` 倍。
+
+至于为什么选择 `360px`，`375px` 这样的值，大概是因为智能手机刚发展的时候屏幕物理像素大部分都是 `480*320px`，之后手机屏幕的技术发展，出现了 `960*640px` 到 `1920*1080px` 甚至 2K 屏的时候，为了页面尺寸兼容以前的手机，所以 `devicePixelRatio` 由 1 变成了 2，然后变成了 3 又变成了 4。
+
+##### 视口控制
+
+我们可以在 `head` 标签中添加 `<meta name="viewport" content="">` 来对页面进行控制。可以控制的属性如下表：
+
+| 属性           | 可取值              | 含义 |
+| -------------- | ------------------- | ---- |
+| width          | 数值或 device-width | layout viewport 的宽度     |
+| height         | 数值或 device-width | layout viewport 的高度     |
+| initital-scale | 数值，可以是小数    |  页面的初始缩放值    |
+| maximum-scale  | 数值，可以是小数    |  允许用户最大缩放值    |
+| minimum-scale  | 数值，可以是小数    |  允许用户最小缩放值    |
+| user-scalable  | no 或者 yes         |  是否用户进行缩放    |
+
 
 
 
