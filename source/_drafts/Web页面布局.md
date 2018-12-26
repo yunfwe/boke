@@ -1271,7 +1271,7 @@ CSS3 新增的样式，粘性定位，这个就比较有意思了。它相当于
 
 有点意思吧！不是实际好像用的并不多。
 
-##### z-index 层级
+##### 层级
 
 如果对元素使用了定位，就非常容易发生元素重叠的情况，我们可以使用 `z-index` 来调整定位元素的堆叠顺序，其取值可以为负整数、0 和正整数，值越大，则定位的元素越居上，如果值相同，则后定义的元素居上。
 
@@ -1485,7 +1485,7 @@ CSS 中可以控制元素显示与隐藏的样式最常用的有三个，一个�
 ```
 ![1545749729658](/uploads/2018/Web页面布局/1545749729658.png)
 
-#### 尺寸单位
+#### 屏幕与像素
 
 ##### 常用单位
 
@@ -1690,8 +1690,84 @@ Vivo X9:
 | minimum-scale  | 数值，可以是小数    |  允许用户最小缩放值    |
 | user-scalable  | no 或者 yes         |  是否用户进行缩放    |
 
+移动端浏览器上，如果页面过大，要么出现滚动条，那么缩放显得很小。理想状态下应该是既不发生缩放，也不出现横向滚动条，看看如何通过配置实现吧。
 
+我们可以将 `layout viewport` 的宽度设置的和 `ideal viewport` 一样，这样就不会出现横向的滚动条了。设置方法是将 `width` 的值设置为 `device-width`：
 
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        div {
+            width: 100px;
+            height: 100px;
+            float: left;
+        }
+        .box1 {
+            background-color: #23d3e7;
+        } 
+        .box2 {
+            background-color: #2b2bff;
+        }
+        .box3 {
+            background-color: #777777;
+        }
+        .box4 {
+            background-color: #ff3e9e;
+        }
+        p {
+            clear: both;
+        }
+    </style>
+</head>
+<body>
+    <div class="box1"></div>
+    <div class="box2"></div>
+    <div class="box3"></div>
+    <div class="box4"></div>
+    <p class="info"></p>
+    <script>
+        let info = document.querySelector(".info")
+        info.innerHTML = ""
+        info.innerHTML += "devicePixelRatio: " + window.devicePixelRatio
+        info.innerHTML += "<br>screen.width: " + window.screen.width
+        info.innerHTML += "<br>screen.height: " + window.screen.height
+        info.innerHTML += "<br>documentElement.clientWidth: " + 
+                            document.documentElement.clientWidth;
+        info.innerHTML += "<br>documentElement.clientHeight: " + 
+                            document.documentElement.clientHeight;
+    </script>
+</body>
+</html>
+```
+
+![1545828113342](/uploads/2018/Web页面布局/1545828113342.png)
+
+可以看到，4 个盒子的宽度是 `100px` 但是页面只有 `360px`，所以最后一个盒子被挤到了下面，接下来将 `width` 的值设置为 `400`：
+
+```html
+<meta name="viewport" content="width=400">
+```
+
+![1545830029389](/uploads/2018/Web页面布局/1545830029389.png)
+
+还有一个 `initital-scale` 可以设置 `layout viewport`，它的值是页面初始的缩放比例，相当于 `ideal viewport / layout viewport`，所以 `width=device-width` 就相当于 `initial-scale=1`。如果值为 
+一般为了兼容性问题，这两个属性都要写。
+
+`maximum-scale` 和 `minimum-scale` 是允许用户最大和最小的缩放值，超过或小于设置的值，用户就没法继续放大或缩小页面了。
+
+还有一个比较常用的设置是 `user-scalable`，将它设置为 `no` 的时候用户就没法用双指对页面进行缩放了。添加新的设置无需创建新的 `meta` 标签，用逗号分隔，直接写到一起即可：
+
+```html
+<meta name="viewport" content="width=device-width,initial-scale=0.5,user-scalable=no">
+```
 
 ### 响应式布局
 
