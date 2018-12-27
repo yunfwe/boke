@@ -1,13 +1,13 @@
 ---
 title: Web页面布局
 date: 2018-12-24 12:50:00
-updated: 2018-12-25
+updated: 2018-12-27
 categories: 
     - Web
 tags:
     - web
     - css
-    - javascript
+    - flex
 photos:
     - /uploads/photos/8fa387f3a.jpg
 ---
@@ -29,8 +29,8 @@ photos:
 ## 教程
 > 这里假使读者已经有了基础的 CSS 知识。如果对这些基础知识还没有概念的话，如果继续往下看，可能会觉得比较难以理解和接受。
 
-### CSS 基础
-> 这里讲诉的 CSS 基础重点在于  **三大特性**、**盒子模型**、**浮动** 和 **定位** 这几个方面，其他的背景啊、边框啊也都是细节，而这几个才是整个页面布局的基础。
+### 布局基础
+> CSS 布局重点在于  **三大特性**、**盒子模型**、**浮动** 和 **定位** 这几个方面，其他的背景啊、边框啊也都是细节，而这几个才是整个页面布局的基础。
 
 #### 显示模式
 
@@ -248,7 +248,7 @@ photos:
 
 ##### 显示模式转换
 
-通过 `display` 样式可以转换元素的默认显示模式：
+通过 `display` 属性可以转换元素的默认显示模式：
 ```css
 .box {
     display: inline;        /* 转换为行内元素 */
@@ -1769,12 +1769,860 @@ Vivo X9:
 <meta name="viewport" content="width=device-width,initial-scale=0.5,user-scalable=no">
 ```
 
-### 响应式布局
+### 页面布局
 
-#### 栅格布局
+随着设备越来越丰富，传统 PC 页面并不能完美的展现在各种屏幕上，为不同的设备再单独开发一套页面来成本也比较大，那么如何让一套页面适应各种屏幕就非常重要了。除了传统的 PC 页面静态布局方式之外，移动互联网的发展也促进了布局方式的发展。
+
 #### 流式布局
-#### flex布局
+
+流式布局（Liquid）是页面元素的宽度按照屏幕分辨率进行适配调整，但整体布局不变。代表作栅栏系统（网格系统）。网页中主要的划分区域的尺寸使用百分数（搭配 `min-*`、`max-*` 属性使用）。
+
+##### 栅栏系统
+
+说到栅栏系统，就不得不说大名鼎鼎的 `bootstrap`。`bootstrap` 将整个页面或某个局部元素的行平均分成 12 等列，然后我们再分配好某个元素在不同的设备下的显示占 12 等列的具体多少列。然后通过媒体查询的方式对页面进行自适应。
+
+看一个例子：
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css">
+    <style>
+        .row > div {
+            border: 1px solid #c9c1d5;
+            border-radius: 5px;
+            height: 50px;
+        }
+        .row > div:nth-last-of-type(2n){
+            background-color: #ccc;
+        }
+        .row {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+                <div class="col-md-1 col-sm-3 col-xs-6"></div>
+                <div class="col-md-1 col-sm-3 col-xs-6"></div>
+                <div class="col-md-1 col-sm-3 hidden-xs"></div>
+                <div class="col-md-1 col-sm-3 hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+                <div class="col-md-1 hidden-sm hidden-xs"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-8 col-sm-4"></div>
+                <div class="col-md-4 col-sm-8 hidden-xs"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-4 col-xs-6"></div>
+                <div class="col-md-3 col-sm-4 col-xs-6"></div>
+                <div class="col-md-3 col-sm-4 col-xs-6"></div>
+                <div class="col-md-3 col-sm-4 col-xs-6"></div>
+            </div>
+                <div class="row">
+                <div class="col-md-6"></div>
+                <div class="col-md-6 hidden-sm hidden-xs"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+```
+![1545830023000](/uploads/2018/Web页面布局/1545830023000.gif)
+
+可以通过类名的方式设置页面元素在哪种屏幕下所占的比例是多少，以及在哪种屏幕下隐藏元素。没有隐藏的元素，当屏幕不够时会自动换行显示。具体的细节可以翻阅 `bootstrap` [中文文档](http://www.bootcss.com/)
+
+#### Flex布局
+
+2009 年的时候，W3C 提出了 Flex 布局，可以非常方便快捷的实现各种页面布局，并且还是响应式的。目前PC 端，如果页面要求兼容 IE10 以下，那么 Flex 布局就不要想了，但是现在的移动端几乎全部支持 Flex。
+
+Flex 意为弹性盒子，任何一个盒子将 `display` 设置为 `flex` 都可以指定为 Flex 布局，行内元素也可以设置为 `inline-flex` 来使用 Flex 布局。Flex 自成 BFC 区域，所以只会影响到当前的盒子。设为 Flex 布局后，子元素就无法使用 `float`，`clear`，`vertical-align` 属性了。
+
+##### 基本概念
+
+![img](/uploads/2018/Web页面布局/2015071004.png)
+
++ 主轴：Flex 的子元素默认按照主轴的方向从左往右排列
++ 侧轴：与主轴垂直的轴，默认从上到下。
+
+当给父容器设置为 Flex 布局后，子元素都转为了 Flex 项目，并且在父容器内按主轴排列。每个子元素占主轴的空间叫主轴尺寸，占侧轴的空间叫侧轴尺寸。
+
+先来体验一下 Flex 布局：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .father {
+            width: 80%;
+            height: 300px;
+            border: 1px solid blue;
+            margin: 100px auto;
+            display: flex;
+            text-align: center;
+        }
+        [class^=box]{
+            font-size: 24px;
+            color: #808080
+        }
+        .box1 {
+            background-color: #f4a8b9;
+            width: 100px;
+        }
+        .box2 {
+            background-color: #bdaeee;
+            flex: 2;
+        }
+        .box3 {
+            background-color: #77c5ee;
+            flex: 1;
+        }
+        .box4 {
+            background-color: #aef1ab;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1">1</div>
+        <div class="box2">2</div>
+        <div class="box3">3</div>
+        <div class="box4">内容撑开盒子</div>
+    </div>
+</body>
+</html>
+```
+
+![1545892573207](/uploads/2018/Web页面布局/1545892573207.png)
+
+首先给 `box1` 设置了固定的宽高，那么它就会独占这么多空间，`box2` 通过 `flex` 设置它占据 Flex 容器的 2 份剩余空间，`box3` 占据 1 份 Flex 容器的剩余空间。之所以是剩余空间，因为 Flex 会优先给设置了固定宽高以及内容撑开的盒子分配空间，之后才会将剩余空间按照 `flex` 指定的份数继续分配。不过若是给 `box1` 也设置了 `flex` 属性，那么给 `box1` 手动设置的宽高将失效！
+
+当对窗体进行拉伸，改变了父容器的大小时，子元素也会自动适应。这就是为什么叫弹性盒子的原因了。
+
+##### 排列方向
+
+默认 4 个盒子的排列方向是从左往右，我们也可以改成从右向左，从上到下甚至从下到上。通过 `flex-direction` 属性可以实现，默认属性值是 `row`。
+
+###### 从右向左排列
+
+给父容器添加 `flex-direction: row-reverse`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-direction: row-reverse;
+}
+```
+
+![1545892861208](/uploads/2018/Web页面布局/1545892861208.png)
+
+盒子主轴起始方向变成了右边。
+
+
+###### 从上向下排列
+
+将父容器的 `flex-direction` 设置为 `column` 原来的侧轴就变成了主轴，元素将默认从上向下排列：
+
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+}
+```
+
+![1545893174322](/uploads/2018/Web页面布局/1545893174322.png)
+
+`.box1` 由于固定了宽度，因为空出一大片空白。
+
+###### 从下往上排列
+
+将父容器的 `flex-direction` 设置为 `column-reverse`：
+
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-direction: column-reverse;
+}
+```
+
+![1545893336962](/uploads/2018/Web页面布局/1545893336962.png)
+
+
+##### 调整主轴对齐
+如果子元素没有占满父元素，那么就会留下空白。这种情况我们就能调整子元素间如何对齐
+
+`justify-content` 属性用来调整子元素在主轴上的对齐方式，目前可用的值有 6 个：`flex-start`、`flex-end`、`center`、`space-between`、`space-around`、`space-evenly`。
+
+一定要注意，调整主轴对齐会受主轴方向的影响！（`flex-direction`）。
+
+###### 主轴开始位置对齐
+
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .father {
+            width: 80%;
+            height: 300px;
+            border: 1px solid blue;
+            margin: 100px auto;
+            display: flex;
+            text-align: center;
+            justify-content: flex-start;
+        }
+        [class^=box]{
+            font-size: 24px;
+            color: #808080;
+            width: 100px;
+            height: 100px;
+        }
+        .box1 {
+            background-color: #f4a8b9;
+        }
+        .box2 {
+            background-color: #bdaeee;
+        }
+        .box3 {
+            background-color: #77c5ee;
+        }
+        .box4 {
+            background-color: #aef1ab;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1">1</div>
+        <div class="box2">2</div>
+        <div class="box3">3</div>
+        <div class="box4">4</div>
+    </div>
+</body>
+</html>
+```
+
+![1545894032141](/uploads/2018/Web页面布局/1545894032141.png)
+
+默认就是 `flex-start` 对齐。
+
+###### 主轴结束位置对齐
+
+将父容器的 `justify-content` 设置为 `flex-end`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: flex-end;
+}
+```
+
+![1545894181522](/uploads/2018/Web页面布局/1545894181522.png)
+
+
+###### 主轴中间位置对齐
+
+将父容器的 `justify-content` 设置为 `center`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+}
+```
+
+![1545894250448](/uploads/2018/Web页面布局/1545894250448.png)
+
+###### 空白在子元素之间
+
+将父容器的 `justify-content` 设置为 `space-between`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: space-between;
+}
+```
+
+![1545894355915](/uploads/2018/Web页面布局/1545894355915.png)
+
+###### 空白环绕子元素
+
+将父容器的 `justify-content` 设置为 `space-around`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: space-around;
+}
+```
+
+![1545894407702](/uploads/2018/Web页面布局/1545894407702.png)
+
+###### 子元素平分空白区域
+
+将父容器的 `justify-content` 设置为 `space-evenly`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: space-evenly;
+}
+```
+
+![1545894520715](/uploads/2018/Web页面布局/1545894520715.png)
+
+这个和 `space-around` 有点像，不同的是 `space-around` 子元素的两边空白相等，所以两个子元素中间就有两倍的空白。而 `space-evenly` 子元素之间和父容器之间的空白都是相等的。
+
+##### 调整侧轴对齐
+
+通过调整侧轴对齐相当于调整垂直方向的对齐方式，通过 `align-items` 来调整。默认值是 `stretch`，在没有给定子元素固定高度的情况下，会让子元素自动适应父容器的高度。如果设置为其他值，则子元素的高度由子元素的内容区域撑开。
+
+![1545894520716](/uploads/2018/Web页面布局/1545894520716.gif)
+
+###### 顶部对其
+
+将父容器的 `align-items` 设置为 `flex-start`。如果没有给子元素指定高度，则默认由子元素内容区域撑开：
+
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: space-evenly;
+    align-items: flex-start;
+}
+```
+![1545894520717](/uploads/2018/Web页面布局/1545894520717.gif)
+
+###### 底部对齐
+
+将父容器的 `align-items` 设置为 `flex-end`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: space-evenly;
+    align-items: flex-end;
+}
+```
+
+![1545895170248](/uploads/2018/Web页面布局/1545895170248.png)
+
+###### 垂直居中对齐
+
+将父容器的 `align-items` 设置为 `center`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    justify-content: space-evenly;
+    align-items: center;
+}
+```
+
+![1545895270452](/uploads/2018/Web页面布局/1545895270452.png)
+
+##### 换行规则
+
+如果子元素过多，总宽度超过父容器的宽度了，默认是不会换行的，所有的盒子会挤到一起。可以通过 `flex-wrap` 来改变这个规则。`flex-wrap` 只有三个值：`nowrap`，`wrap`，`wrap-reverse`。
+
+还有一个 `flex-flow` 相当于 `flex-direction` 和 `flex-wrap` 的综合体，可以同时对这两个属性的值进行设置。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .father {
+            width: 80%;
+            height: 300px;
+            border: 1px solid blue;
+            margin: 100px auto;
+            display: flex;
+            text-align: center;
+        }
+        [class^=box]{
+            font-size: 24px;
+            color: #808080;
+            width: 100px;
+            height: 100px;
+        }
+        .box1 {
+            background-color: #f4a8b9;
+        }
+        .box2 {
+            background-color: #bdaeee;
+        }
+        .box3 {
+            background-color: #77c5ee;
+        }
+        .box4 {
+            background-color: #aef1ab;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1">1</div>
+        <div class="box2">2</div>
+        <div class="box3">3</div>
+        <div class="box4">4</div>
+        <div class="box1">5</div>
+        <div class="box2">6</div>
+    </div>
+</body>
+</html>
+```
+
+添加两个盒子，盒子的宽度被自动压缩了：
+
+![1545896942182](/uploads/2018/Web页面布局/1545896942182.png)
+
+
+###### 正常换行
+
+将父容器的 `flex-wrap` 设置为 `wrap`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-wrap: wrap;
+}
+```
+
+![1545897147941](/uploads/2018/Web页面布局/1545897147941.png)
+
+###### 反转换行
+
+将父容器的 `flex-wrap` 设置为 `wrap-reverse`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-wrap: wrap-reverse;
+}
+```
+
+![1545897190367](/uploads/2018/Web页面布局/1545897190367.png)
+
+##### 多行情况下的侧轴对齐
+
+前面讲到的 `align-items` 是设置只有单行情况下的侧轴对齐，还有一个 `align-content` 用来设置多行情况下的侧轴对其。`align-content` 的使用必须在 `flex-direction: row` 和 `flex-wrap: wrap` 或 `flex-wrap: wrap-reverse` 的情况下才可以使用。
+
+与 `align-items` 的性质也一样，默认 `stretch`，子元素没设置高度会自动拉伸。
+
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-flow: row wrap;
+}
+```
+
+![1545897190368](/uploads/2018/Web页面布局/1545897190368.gif)
+
+###### 顶部对齐
+
+将父容器的 `align-content` 设置为 `flex-start`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-flow: row wrap;
+    align-content: flex-start;
+}
+```
+
+![1545898408991](/uploads/2018/Web页面布局/1545898408991.png)
+
+###### 中心对齐
+
+将父容器的 `align-content` 设置为 `center`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-flow: row wrap;
+    align-content: center;
+}
+```
+
+![1545898531818](/uploads/2018/Web页面布局/1545898531818.png)
+
+###### 底部对齐
+
+将父容器的 `align-content` 设置为 `flex-end`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-flow: row wrap;
+    align-content: flex-end;
+}
+```
+
+![1545898574597](/uploads/2018/Web页面布局/1545898574597.png)
+
+###### 各行之间留空
+
+将父容器的 `align-content` 设置为 `space-between`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-flow: row wrap;
+    align-content: space-between;
+}
+```
+
+![1545898646064](/uploads/2018/Web页面布局/1545898646064.png)
+
+###### 各行前后都留空
+
+将父容器的 `align-content` 设置为 `space-around`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-flow: row wrap;
+    align-content: space-around;
+}
+```
+
+![1545898892440](/uploads/2018/Web页面布局/1545898892440.png)
+
+###### 各行平分空白
+
+将父容器的 `align-content` 设置为 `space-evenly`：
+```css
+.father {
+    width: 80%;
+    height: 300px;
+    border: 1px solid blue;
+    margin: 100px auto;
+    display: flex;
+    text-align: center;
+    flex-flow: row wrap;
+    align-content: space-evenly;
+}
+```
+
+![1545898982821](/uploads/2018/Web页面布局/1545898982821.png)
+
+
+##### 子元素的一些属性
+
+上面讲到的属性都是应用与父容器的，通过各种属性的配置已经可以实现很多复杂的布局。还有一些用于子元素的属性，可以让 Flex 布局的灵活性更高一层。
+
+###### 调整子元素顺序
+
+给子元素的 `order` 属性设置不同的值，值越大的越靠后，默认是 0 。
+
+```css
+.box3 {
+    background-color: #77c5ee;
+    order: -1
+}
+```
+
+只给 `.box3` 应用了 `order` 属性，`-1` 比其他子元素的 `order` 都小，所以会排在第一个：
+
+![1545899885232](/uploads/2018/Web页面布局/1545899885232.png)
+
+
+###### 子元素放大比例
+
+使用 `flex-grow` 可以配置当某一行拥有剩余空间的话，将某个元素放大到剩余空间的倍数。值默认是 0 ，不进行放大。
+
+```css
+.box4 {
+    background-color: #aef1ab;
+    flex-grow: 0.5;
+}
+```
+
+![1545900703463](/uploads/2018/Web页面布局/1545900703463.png)
+
+`0.5` 倍表示如果一行的剩余空间为 `80px` 那么 `.box4` 最多会被放大到 `140px`，因为剩余空间的 `0.5` 倍是 `40px`。
+
+###### 子元素缩小比例
+
+使用 `flex-shrink` 设置一行空间不足时，子元素自动缩小的比例。默认是 1。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .father {
+            width: 80%;
+            height: 300px;
+            border: 1px solid blue;
+            margin: 100px auto;
+            display: flex;
+            text-align: center;
+        }
+        [class^=box]{
+            font-size: 24px;
+            color: #808080;
+            width: 100px;
+            flex-shrink: 1;
+        }
+        .box1 {
+            background-color: #f4a8b9;
+        }
+        .box2 {
+            background-color: #bdaeee;
+        }
+        .box3 {
+            background-color: #77c5ee;
+            order: -1
+        }
+        .box4 {
+            background-color: #aef1ab;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1">1</div>
+        <div class="box2">2</div>
+        <div class="box3">3</div>
+        <div class="box4">4</div>
+        <div class="box1">5</div>
+        <div class="box2">6</div>
+    </div>
+</body>
+</html>
+```
+
+![1545901886645](/uploads/2018/Web页面布局/1545901886645.png)
+
+当其他元素的 `flex-shrink` 为 1，`.box4` 为 0 的时候，如果没有剩余空间，那么其他元素都会缩小，而 `.box4` 不会。
+
+###### 子元素占据固定空间
+
+`flex-basis` 属性定义了分配多余空间之前，项目占据的主轴空间尺寸。如果 `flex-direction` 是 `row`，那么 `flex-basic`就相当于 `width`，如果 `flex-direction` 是 `column`，它就相当于 `height`。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .father {
+            width: 80%;
+            height: 300px;
+            border: 1px solid blue;
+            margin: 100px auto;
+            display: flex;
+            text-align: center;
+            flex-flow: column wrap;
+            align-content: space-evenly;
+        }
+        [class^=box]{
+            font-size: 24px;
+            color: #808080;
+            width: 100px;
+            flex-basis: 120px;
+        }
+        .box1 {
+            background-color: #f4a8b9;
+        }
+        .box2 {
+            background-color: #bdaeee;
+        }
+        .box3 {
+            background-color: #77c5ee;
+            order: -1
+        }
+        .box4 {
+            background-color: #aef1ab;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1">1</div>
+        <div class="box2">2</div>
+        <div class="box3">3</div>
+        <div class="box4">4</div>
+        <div class="box1">5</div>
+        <div class="box2">6</div>
+    </div>
+</body>
+</html>
+```
+
+![1545902495016](/uploads/2018/Web页面布局/1545902495016.png)
+
+
+###### 子元素所占空余空间份数
+
+`flex` 属性设置子元素占据空余空间的份数，这个在 Flex 布局的刚开始就演示了，这里就不再多说。
+
+###### 子元素设置特有的对齐方式
+
+默认子元素的对齐方式是从父容器的 `align-items` 继承来的，通过 `align-self` 属性来进行设置，值是 `auto`。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .father {
+            width: 80%;
+            height: 300px;
+            border: 1px solid blue;
+            margin: 100px auto;
+            display: flex;
+            text-align: center;
+            flex-flow: row wrap;
+            align-items: flex-start;
+        }
+        [class^=box]{
+            font-size: 24px;
+            color: #808080;
+            width: 100px;
+            height: 100px;
+        }
+        .box1 {
+            background-color: #f4a8b9;
+        }
+        .box2 {
+            background-color: #bdaeee;
+        }
+        .box3 {
+            background-color: #77c5ee;
+            align-self: flex-end;
+        }
+        .box4 {
+            background-color: #aef1ab;
+        }
+    </style>
+</head>
+<body>
+    <div class="father">
+        <div class="box1">1</div>
+        <div class="box2">2</div>
+        <div class="box3">3</div>
+        <div class="box4">4</div>
+    </div>
+</body>
+</html>
+```
+
+![1545903014010](/uploads/2018/Web页面布局/1545903014010.png)
+
+
 #### 媒体查询
+
+
+
+
 #### rem/em布局
 
 https://www.jianshu.com/p/090ada2f3080
