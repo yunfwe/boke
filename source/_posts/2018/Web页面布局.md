@@ -1,7 +1,7 @@
 ---
 title: Web页面布局
 date: 2018-12-24 12:50:00
-updated: 2018-12-27
+updated: 2018-12-28
 categories: 
     - Web
 tags:
@@ -1495,7 +1495,7 @@ CSS 中可以控制元素显示与隐藏的样式最常用的有三个，一个�
 
 图中可以看到，当我们给元素设置宽高时，IDE 给我们显示出了所有可用的单位。
 
-<table><thead><tr><th width="100px">单位</th><th>描述</th></tr></thead><tbody><tr><td>%</td><td>相对于父元素相同属性的百分比。</td></tr><tr><td>px</td><td>像素点，跟屏幕的物理性质相关。</td></tr><tr><td>in</td><td>英寸，跟 px 的换算是 1in == 96px （基于屏幕为 96 DPI计算）</td></tr><tr><td>cm</td><td>厘米，并非生活中的厘米，这里 1cm == 37.8px</td></tr><tr><td>mm</td><td>毫米，1mm == .1cm == 3.78px</td></tr><tr><td>em</td><td>基于父容器的字体大小，font-size 是多少，1em就是多少</td></tr><tr><td>rem</td><td>与 em 类似，不过 rem 是基于根元素（html）的字体大小</td></tr><tr><td>pt</td><td>印刷行业常用单位，1pt == 1/72英寸</td></tr></tbody></table>
+<table><thead><tr><th width="100px">单位</th><th>描述</th></tr></thead><tbody><tr><td>%</td><td>相对于父元素相同属性的百分比。</td></tr><tr><td>px</td><td>像素点，跟屏幕的物理性质相关。</td></tr><tr><td>in</td><td>英寸，跟 px 的换算是 1in == 96px （基于屏幕为 96 DPI计算）</td></tr><tr><td>cm</td><td>厘米，并非生活中的厘米，这里 1cm == 37.8px</td></tr><tr><td>mm</td><td>毫米，1mm == .1cm == 3.78px</td></tr><tr><td>em</td><td>基于当前容器的字体大小，font-size 是多少，1em就是多少</td></tr><tr><td>rem</td><td>与 em 类似，不过 rem 是基于根元素（html）的字体大小</td></tr><tr><td>pt</td><td>印刷行业常用单位，1pt == 1/72英寸</td></tr></tbody></table>
 
 ##### 屏幕 DPI（PPI）
 
@@ -2620,13 +2620,309 @@ Flex 意为弹性盒子，任何一个盒子将 `display` 设置为 `flex` 都�
 
 #### 媒体查询
 
+##### 基本概念
+
+媒体查询是响应式开发中重要的知识点，比如 `bootstrap` 的响应式布局本质上就是借助媒体查询实现的，那么到底什么是媒体查询呢？其实就是查询屏幕的宽度，然后针对不同的屏幕宽度设置不同的样式来适应不同的屏幕。简单来说，就是给不同屏幕尺寸编写不同的样式，然后 CSS 会自动根据实际的屏幕来应用我们预先编写好的样式。
+
+bootstrap 中给不同的设备预定义了一些尺寸，这些只是作为建议：
+
+| 设备                       | 尺寸            |
+| -------------------------- | --------------- |
+| 超小屏幕，手机等设备       | w < 768px       |
+| 小屏设备，平板等设备       | 768 <= w < 992  |
+| 中等屏幕，桌面显示器等设备 | 992 <= w < 1200 |
+| 超大屏幕，大型的显示器     | w >= 1200       |
+
+##### 语法规则
+
+```css
+@media mediatype and|not|only (media feature) {
+    CSS-Code;
+}
+```
+
+或者针对不同的媒体使用不同的外部样式表：
+
+```html
+<link rel="stylesheet" 
+media="mediatype and|not|only (media feature)" 
+href="mystylesheet.css">
+```
+
+mediatype 的可选值除了已经废弃的有如下几种：
+
+| 值     | 说明                           |
+| ------ | ------------------------------ |
+| all    | 用于所有设备                   |
+| print  | 用于打印机                     |
+| screen | 用于电脑屏幕、平板电脑、手机等 |
+| speech | 应用于屏幕阅读器等发声设备     |
 
 
+`and|not|only` 实现简单的逻辑，媒体功能（`media feature`）最常用的就是 `min-width` 和 `max-width` 了。
 
-#### rem/em布局
+接下来看看具体如何编写媒体查询吧。
 
-https://www.jianshu.com/p/090ada2f3080
+##### 自适应实现
 
+我们现在要编写一套和 bootstrap 一样的媒体查询功能，首先编写屏幕像素小于 `768px` 的媒体查询：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @media screen and (max-width: 768px) {
+            body {
+                background-color: #b4e9bd;
+            }
+        }
+    </style>
+</head>
+<body>
+</body>
+</html>
+```
+
+这条规则白话文来说就是：如果我们在使用电脑或手机屏幕，并且屏幕的尺寸最大 `768px`，那么就将页面的背景变成淡绿色。接下来添加大于 `768px` 小于 `992px` 的规则：
+
+```css
+<style>
+    @media screen and (max-width: 768px) {
+        body {
+            background-color: #b4e9bd;
+        }
+    }
+    @media screen and (min-width: 768px) and (max-width: 992px) {
+        body {
+          background-color: #f4a8b9;
+        }
+    }
+</style>
+```
+
+这条规则意思是：当屏幕尺寸最小 `768px` 并且最大 `992px` 的时候，将页面背景变成淡红色。接下来添加大于 `992px` 小于 `1200px` 的规则：
+
+```css
+<style>
+    @media screen and (max-width: 768px) {
+        body {
+            background-color: #b4e9bd;
+        }
+    }
+    @media screen and (min-width: 768px) and (max-width: 992px) {
+        body {
+            background-color: #f4a8b9;
+        }
+    }
+    @media screen and (min-width: 992px) and (max-width: 1200px) {
+        body {
+            background-color: #f4a8b9;
+        }
+    }
+</style>
+```
+
+当屏幕尺寸最小 `992px` 并且最大 `1200px` 的时候，将页面背景变成淡紫色。屏幕尺寸大于 `1200px` 的规则：
+
+```css
+<style>
+    @media screen and (max-width: 768px) {
+        body {
+            background-color: #b4e9bd;
+        }
+    }
+    @media screen and (min-width: 768px) and (max-width: 992px) {
+        body {
+            background-color: #f4a8b9;
+        }
+    }
+    @media screen and (min-width: 992px) and (max-width: 1200px) {
+        body {
+            background-color: #f4a8b9;
+        }
+    }
+    @media screen and (min-width: 1200px) {
+        body {
+          background-color: #77c5ee;
+        }
+      }
+</style>
+```
+
+屏幕大于 `1200px` 时，页面背景变成淡蓝色，接下来看看实际表现如何：
+
+![1545903014011](/uploads/2018/Web页面布局/1545903014011.gif)
+
+##### 代码优化
+
+上面的代码虽然已经实现了我们希望的功能，但是一般并不会这么啰嗦的写。我们可以借助设置默认样式和 CSS 的样式覆盖特性来简化代码：
+
+```html
+<style>
+    body {
+        background-color: #b4e9bd;
+    }
+    @media screen and (min-width: 768px){
+        body {
+        background-color: #f4a8b9;
+        }
+    }
+    @media screen and (min-width: 992px) {
+        body {
+        background-color: #bdaeee;
+        }
+    }
+    @media screen and (min-width: 1200px) {
+        body {
+        background-color: #77c5ee;
+        }
+    }
+</style>
+```
+
+我们先设置个默认的背景色，然后随着屏幕尺寸变大，当满足大于 `768px` 的时候，就自动应用了相应的样式并覆盖掉默认的样式。接着屏幕继续变大，当满足大于 `992px` 的时候，又将大于 `768px` 的样式覆盖掉。以此类推，当屏幕大于 `1200px` 的时候就没有可以覆盖掉它的媒体查询了。
+
+媒体查询有好处也有坏处，坏处就是移动端和桌面端所需要的样式是并不相同的，甚至移动端有一些页面元素也不需要显示，但是依然会将所有的代码都下载下来，甚至不需要显示的一些图片等资源也会被下载下来。
+
+
+#### rem布局
+
+`rem` 屏幕与像素的一章中有讲到，是一个尺寸单位。有一个与它类似的单位是 `em`，这个单位与 `px` 的换算基于当前容器的字号，则字号所以经常被用在段落首行缩进上：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        div {
+            text-indent: 2em;
+        }
+    </style>
+  </head>
+  <body>
+    <div>
+        这是一段话。这是一段话。这是一段话。
+        这是一段话。这是一段话。这是一段话。
+        这是一段话。这是一段话。这是一段话。
+        这是一段话。这是一段话。这是一段话。
+    </div>
+    <div>
+        这是一段话。这是一段话。这是一段话。
+        这是一段话。这是一段话。这是一段话。
+    </div>
+  </body>
+</html>
+```
+
+![1545925122734](/uploads/2018/Web页面布局/1545925122734.png)
+
+但是 `em` 并不适合布局，浏览器默认字号是 `16px`，但是每一个页面元素的字号并不全部相同，那么 `1em` 在不同的元素中可能都不相同，会给我们带来换算上的麻烦。而 `rem` 基于根标签（`html`）的字号，这样整个页面中 `1rem` 的值每个元素中都是相同的。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        html {
+            font-size: 20px;
+        }
+        .box {
+            width: 10rem;
+            height: 10rem;
+            background-color: #69ccf1;
+            position: relative;
+            top: 100px;
+            left: 100px;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="box"></div>
+  </body>
+</html>
+```
+
+![1545927069923](/uploads/2018/Web页面布局/1545927069923.png)
+
+将 `html` 的字号改为 `20px`，`10rem` 的确相当于 `200px`。这样的好处是什么呢，那就是我们可以只更改根元素的字号，就可以让页面其他使用 `rem` 的元素都进行改变而不用改它们的样式。最简单的方法就是配合媒体查询，不同的屏幕像素，然后给根元素一个不同的字号。
+
+这个字号该如何计算呢？这个并没有一个标准，我们可以将屏幕分成 20 份，然后将每一份的值做为字号。比如移动端如果 `viewport` 的 `device-width` 为 360 像素，我们就可以将字号设置为 `360 / 20 = 18px`。下面看代码实现：
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        @media screen and (device-width: 360px) {
+            html {
+                font-size: 18px;
+            }
+        }
+        @media screen and (device-width: 375px) {
+            html {
+                font-size: 18.75px;
+            }
+        }
+        @media screen and (device-width: 768px) {
+            html {
+                font-size: 38.4px;
+            }
+        }
+        .box {
+            width: 10rem;
+            height: 10rem;
+            background-color: #69ccf1;
+            margin: 2em auto;
+        }
+        .info {
+            text-align: center;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="box"></div>
+    <p class="info"></p>
+    <script>
+        let box = document.querySelector(".box")
+        let info = document.querySelector(".info")
+        info.innerHTML = "box width: " + box.clientWidth + "</br>"
+        info.innerHTML += "box height: " + box.clientHeight + "</br>"
+        info.innerHTML += "screen width: " + window.screen.width + "</br>"
+        info.innerHTML += "screen height: " + window.screen.height + "<br>"
+    </script>
+  </body>
+</html>
+```
+
+安卓端显示：
+
+![1545929942772](/uploads/2018/Web页面布局/1545929942772.png)
+
+苹果手机显示：
+
+![1545930012006](/uploads/2018/Web页面布局/1545930012006.png)
+
+iPad显示：
+
+![1545930039919](/uploads/2018/Web页面布局/1545930039919.png)
+
+PC端显示：
+
+![1545930095963](/uploads/2018/Web页面布局/1545930095963.png)
+
+由于 PC 端 Win10 的原因，对显示器进行了 1.25 的缩放，所以 `1536 × 1.25 = 1920` 才是实际的分辨率。
 
 ## 附录
 
++ [bootstrap](http://www.bootcss.com/)
++ [Flex - 阮一峰](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
++ [媒体查询](http://www.runoob.com/cssref/css3-pr-mediaquery.html)
