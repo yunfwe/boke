@@ -18,3 +18,57 @@ h5 {
 h6 {
 	color: #8B475D;
 }
+
+
+@font-face {
+  font-family: 'iconfont';
+  src: url('/uploads/fonts/iconfont.eot');
+  src: url('/uploads/fonts/iconfont.eot?#iefix') format('embedded-opentype'),
+  url('/uploads/fonts/iconfont.woff') format('woff'),
+  url('/uploads/fonts/iconfont.ttf') format('truetype'),
+  url('/uploads/fonts/iconfont.svg#iconfont') format('svg');
+}
+
+
+.hider_title{
+    font-family: "Microsoft Yahei";
+    cursor: pointer;
+}
+.close:before{
+	font-family: 'iconfont';
+	font-size: 12px;
+    content: "\e658";
+}
+.open:before{
+	font-family: 'iconfont';
+	font-size: 12px;
+    content: "\e640";
+}
+
+.fold_hider {
+	margin-bottom: 1em;	
+	background-color #f4f4f4;
+	border-radius: 5px;
+}
+
+.fold_hider :hover {
+	transition: all .2s ease-in-out;
+	background-color #dddddd;
+	border-radius: 5px;
+}
+
+
+.hider_title:after {
+	font-family: 'iconfont';
+	font-size: 1.5em;
+    content: "\e615";
+	float: right;
+	vertical-align: bottom;
+	height : 1.5em;
+	position relative;
+	top: -0.3em;
+	right: 5px;
+	
+}
+
+
