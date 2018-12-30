@@ -1,6 +1,6 @@
 ---
 title: 从零开始搭建Vue开发环境
-date: 2018-12-20 12:50:00
+date: 2018-12-21 12:50:00
 updated: 2018-12-21
 categories: 
     - Vue
