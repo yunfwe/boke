@@ -873,8 +873,6 @@ for age,items in groupby(rows, key=itemgetter('age')):
 对文件修改的场景还是经常遇到的，但是如果要修改一个非常大的文件，传统的读取文件，修改文件，写回文件的方式就非常不合适了。
 
 
-
-
 ## 第三方库
 
 ### chatdet
