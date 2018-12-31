@@ -16,7 +16,7 @@ photos:
 <!-- more -->
 
 ## 环境
-> 由于浏览器环境不支持 async/await 这些 ES8 提案才支持的语法，因此 JavaScript 执行环境选择 Node.js。浏览器不支持包含 ES7/ES8 的语法特性的代码，可以通过 Babel 等工具转为低版本 JavaScript 语法运行。
+> 由于大多数浏览器环境不支持 async/await 这些 ES8 提案才支持的语法，因此 JavaScript 执行环境选择 Node.js。浏览器不支持包含 ES7/ES8 的语法特性的代码，可以通过 Babel 等工具转为低版本 JavaScript 语法运行。
 
 | 软件     | 版本       |
 | -------- | ---------- |
